@@ -1,1 +1,0 @@
-/home/leon/.emacs.d/straight/repos/frame-local/frame-local.el

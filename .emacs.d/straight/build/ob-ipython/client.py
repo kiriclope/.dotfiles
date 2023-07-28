@@ -1,1 +1,0 @@
-/home/leon/.emacs.d/straight/repos/ob-ipython/client.py

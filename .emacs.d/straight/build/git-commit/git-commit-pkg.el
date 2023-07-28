@@ -1,1 +1,0 @@
-/home/leon/.emacs.d/straight/repos/magit/lisp/git-commit-pkg.el

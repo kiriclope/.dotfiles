@@ -1,1 +1,0 @@
-/home/leon/.emacs.d/straight/repos/tree-sitter-langs/queries/java/highlights.scm

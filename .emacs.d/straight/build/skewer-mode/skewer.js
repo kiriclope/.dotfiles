@@ -1,1 +1,0 @@
-/home/leon/.emacs.d/straight/repos/skewer-mode/skewer.js

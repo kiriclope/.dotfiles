@@ -1,1 +1,0 @@
-/home/leon/.emacs.d/straight/repos/py-isort.el/py-isort.el

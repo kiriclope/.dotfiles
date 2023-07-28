@@ -1,1 +1,0 @@
-/home/leon/.emacs.d/straight/repos/jupyter/jupyter-kernel.el
