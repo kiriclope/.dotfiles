@@ -48,5 +48,5 @@ PERL_MM_OPT="INSTALL_BASE=/home/leon/local/perl5"; export PERL_MM_OPT;
 export VISUAL=emacsclient
 export EDITOR="$VISUAL"
 
-# Load .bashrc to get login environment
-[ -f ~/.bashrc ] && . ~/.bashrc
+# # Load .bashrc to get login environment
+# [ -f ~/.bashrc ] && . ~/.bashrc
