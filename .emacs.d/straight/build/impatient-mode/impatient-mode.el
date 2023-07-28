@@ -1,0 +1,1 @@
+/home/leon/.emacs.d/straight/repos/impatient-mode/impatient-mode.el

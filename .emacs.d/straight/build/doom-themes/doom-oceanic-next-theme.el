@@ -1,0 +1,1 @@
+/home/leon/.emacs.d/straight/repos/themes/themes/doom-oceanic-next-theme.el

@@ -1,0 +1,1 @@
+/home/leon/.emacs.d/straight/repos/yasnippet-snippets/snippets/julia-mode/.yas-setup.el

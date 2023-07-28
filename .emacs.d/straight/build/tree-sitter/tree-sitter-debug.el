@@ -1,0 +1,1 @@
+/home/leon/.emacs.d/straight/repos/elisp-tree-sitter/lisp/tree-sitter-debug.el

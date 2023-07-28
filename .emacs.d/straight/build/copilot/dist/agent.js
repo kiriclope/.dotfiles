@@ -1,0 +1,1 @@
+/home/leon/.emacs.d/straight/repos/copilot.el/dist/agent.js

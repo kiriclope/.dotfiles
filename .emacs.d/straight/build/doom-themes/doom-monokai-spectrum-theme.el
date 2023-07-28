@@ -1,0 +1,1 @@
+/home/leon/.emacs.d/straight/repos/themes/themes/doom-monokai-spectrum-theme.el

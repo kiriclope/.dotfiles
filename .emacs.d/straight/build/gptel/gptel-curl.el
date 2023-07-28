@@ -1,0 +1,1 @@
+/home/leon/.emacs.d/straight/repos/gptel/gptel-curl.el
