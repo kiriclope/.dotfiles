@@ -43,3 +43,10 @@ PERL5LIB="/home/leon/local/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PER
 PERL_LOCAL_LIB_ROOT="/home/leon/local/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
 PERL_MB_OPT="--install_base \"/home/leon/local/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=/home/leon/local/perl5"; export PERL_MM_OPT;
+
+# We're in Emacs, yo
+export VISUAL=emacsclient
+export EDITOR="$VISUAL"
+
+# Load .bashrc to get login environment
+[ -f ~/.bashrc ] && . ~/.bashrc
