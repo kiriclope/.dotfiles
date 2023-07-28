@@ -1,0 +1,24 @@
+font.size: 10
+figure.figsize: 4.854, 3.0
+figure.facecolor: white
+savefig.dpi: 300
+figure.subplot.bottom: 0.125
+figure.edgecolor: white
+figure.autolayout: True
+lines.linewidth: 1
+lines.markeredgewidth: 0.3
+lines.markersize: 2.5
+legend.fontsize: 8
+axes.facecolor: 1
+axes.edgecolor: 0
+axes.linewidth: 0.7
+axes.labelcolor: 0
+axes.labelsize: 9.5
+axes.titlesize: 9.5
+xtick.labelsize: 8
+ytick.labelsize: 8
+xtick.color: 0
+ytick.color: 0
+xtick.major.size: 2
+ytick.major.size: 2
+font.sans-serif: Arial
