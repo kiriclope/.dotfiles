@@ -3,3 +3,4 @@
 .emacs.d/straight/modified/
 .emacs.d/straight/repos/
 .emacs.d/straight/build-cache.el
+.emacs.d/elpa/*
