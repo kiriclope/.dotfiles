@@ -31,6 +31,12 @@
 ;; equivalent of use-package-always-ensure
 (setq straight-use-package-by-default t)
 
+(use-package exec-path-from-shell
+  :ensure t
+  :init
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
 (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
       url-history-file (expand-file-name "url/history" user-emacs-directory))
@@ -51,7 +57,7 @@
 (load custom-file t)
 
 (set-default-coding-systems 'utf-8)
-(setq exec-path (append exec-path '("/usr/include/c++/11")))
+;; (setq exec-path (append exec-path '("/usr/include/c++/11")))
 
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -129,9 +135,14 @@
 
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-define-key 'normal org-mode-map (kbd "M-n") 'org-babel-next-src-block)
 
-  (evil-global-set-key 'normal (kbd "M-n") 'next-buffer)
-  (evil-global-set-key 'normal (kbd "M-p") 'previous-buffer)
+  (evil-define-key 'normal org-mode-map (kbd "M-p") 'org-babel-previous-src-block)
+  (evil-define-key 'emacs org-mode-map (kbd "M-n") 'org-babel-next-src-block)
+  (evil-define-key 'emacs org-mode-map (kbd "M-p") 'org-babel-previous-src-block)
+
+  ;; (evil-global-set-key 'normal (kbd "M-n") 'next-buffer)
+  ;; (evil-global-set-key 'normal (kbd "M-p") 'previous-buffer)
 
   (defun dw/dont-arrow-me-bro ()
     (interactive)
@@ -409,7 +420,8 @@
   "tp" 'parinfer-toggle-mode)
 
 (use-package origami
-  :hook (yaml-mode . origami-mode))
+  :hook ((yaml-mode . origami-mode)
+         (python-mode . origami-mode)))
 
 (defun dw/org-file-jump-to-heading (org-file heading-title)
   (interactive)
@@ -782,69 +794,9 @@
     :defer t)
   )
 
-;; Org mode
-(setq-default fill-column 120)
+;; Increase the size of various headings
+(defun my/org-fonts ()
 
-;; Turn on indentation and auto-fill mode for Org files
-(defun dw/org-mode-setup ()
-  (org-indent-mode)
-  (variable-pitch-mode 1)
-  (auto-fill-mode 0)
-  (visual-line-mode 1)
-  (setq evil-auto-indent nil)
-  (setq org-support-shift-select t)
-  (diminish org-indent-mode))
-
-;; Make sure Straight pulls Org from Guix
-(straight-use-package '(org :type built-in))
-
-(use-package org
-  :defer t
-  :hook (org-mode . dw/org-mode-setup)
-  :config
-  (setq org-ellipsis " ▾"
-        org-hide-emphasis-markers t
-        org-src-fontify-natively t
-        org-fontify-quote-and-verse-blocks t
-        org-src-tab-acts-natively t
-        org-edit-src-content-indentation 2
-        org-hide-block-startup nil
-        org-src-preserve-indentation nil
-        org-startup-folded 'content
-        org-cycle-separator-lines 2
-        org-capture-bookmark nil)
-
-  (setq org-modules
-        '(org-crypt
-          org-habit
-          ;; org-bookmark
-          ;; org-eshell
-          ))
-
-  (setq org-refile-targets '((nil :maxlevel . 1)
-                             (org-agenda-files :maxlevel . 1)))
-
-  (setq org-outline-path-complete-in-steps nil)
-  (setq org-refile-use-outline-path t)
-  (setq org-startup-with-inline-images t) ;; Display inline images on startup
-  (setq org-confirm-babel-evaluate nil) ;; Don't prompt for confirmation when evaluating code blocks
-  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append) ;; Display inline images after executing code blocks
-
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (python . t)
-     (shell . t)
-     (ipython . t)
-     (C . t)
-     ;; (jupyter . t)
-     ))
-
-  (push '("conf-unix" . conf-unix) org-src-lang-modes)
-
-  ;; Use bullet characters instead of asterisks, plus set the header font sizes to something more palatable.  A fair amount of inspiration has been taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][this blog post]].
-
-  ;; Increase the size of various headings
   (set-face-attribute 'org-document-title nil :font "Cantarell" :weight 'bold :height 1.3)
   (dolist (face '((org-level-1 . 1.2)
                   (org-level-2 . 1.1)
@@ -872,7 +824,9 @@
 
   ;; Get rid of the background on column views
   (set-face-attribute 'org-column nil :background nil)
-  (set-face-attribute 'org-column-title nil :background nil)
+  (set-face-attribute 'org-column-title nil :background nil))
+
+(defun my/org-block-templates ()
 
   ;; Block Templates
   ;; the template.  More documentation can be found at the Org Mode [[https://orgmode.org/manual/Easy-templates.html][Easy Templates]]
@@ -891,9 +845,91 @@
   (add-to-list 'org-structure-template-alist '("ipy" . "src ipython :results drawer :async t :session mysession"))
   (add-to-list 'org-structure-template-alist '("go" . "src go"))
   (add-to-list 'org-structure-template-alist '("yaml" . "src yaml"))
-  (add-to-list 'org-structure-template-alist '("json" . "src json"))
+  (add-to-list 'org-structure-template-alist '("json" . "src json")))
 
+;; Org mode
+(setq-default fill-column 120)
+
+;; Turn on indentation and auto-fill mode for Org files
+(defun dw/org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1)
+  (auto-fill-mode 0)
+  (visual-line-mode 1)
+  (setq evil-auto-indent nil)
+  (setq org-support-shift-select t)
+  (diminish org-indent-mode))
+
+;; Make sure Straight pulls Org from Guix
+(straight-use-package '(org :type built-in))
+
+(use-package org
+  ;; :straight (org-plus-contrib
+  ;;            :type git
+  ;;            :host github
+  ;;            :repo "emacs-straight/org-mode"
+  ;;            :local-repo "org")
+  ;; :straight (org-plus-contrib :repo "https://code.orgmode.org/bzg/org-mode.git" :local-repo "org" :files ("*.el" "lisp/*.el" "contrib/lisp/*.el"))
+  :ensure t
+  :defer t
+  :hook ((org-mode . dw/org-mode-setup)
+         (org-mode . my/org-fonts)
+         (org-mode . my/org-block-templates))
+  :config
+  (setq org-ellipsis " ▾"
+        org-hide-emphasis-markers t
+        org-src-fontify-natively t
+        org-fontify-quote-and-verse-blocks t
+        org-src-tab-acts-natively t
+        org-edit-src-content-indentation 2
+        org-hide-block-startup nil
+        org-src-preserve-indentation nil
+        org-startup-folded 'content
+        org-cycle-separator-lines 2
+        org-capture-bookmark nil)
+
+  (setq org-modules
+        '(org-crypt
+          org-habit
+          ))
+
+  (setq org-refile-targets '((nil :maxlevel . 1)
+                             (org-agenda-files :maxlevel . 1)))
+
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-use-outline-path t)
+
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
+
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
+
+  (setq org-startup-with-inline-images t) ;; Display inline images on startup
+  (setq org-confirm-babel-evaluate nil) ;; Don't prompt for confirmation when evaluating code blocks
+  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append) ;; Display inline images
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t)
+     (shell . t)
+     (ipython . t)
+     (C . t)
+     ))
+
+  (push '("conf-unix" . conf-unix) org-src-lang-modes)
+
+  (require 'ox-latex)
+  (require 'ox-md))
+
+(use-package  ob-ipython
+  :after org
+  :config
+  ;; set default ipython exex
   (setq org-babel-python-command "/home/leon/mambaforge/bin/python3")
+
+  ;; fix bug with json and obipython
   (advice-add 'ob-ipython--collect-json :before
               (lambda (&rest args)
                 (let ((start (point)))
@@ -905,49 +941,18 @@
                     (set-mark (point)))
                   (end-of-buffer)
                   (kill-region (region-beginning) (region-end))
-                  (goto-char start))))
+                  (goto-char start)))))
 
-  ;; (evil-define-key 'normal org-mode-map (kbd "M-n") 'org-forward-heading-same-level)
-  ;; (evil-define-key 'normal org-mode-map (kbd "M-p") 'org-backward-heading-same-level)
-  ;; (evil-define-key 'emacs org-mode-map (kbd "M-n") 'org-forward-heading-same-level)
-  ;; (evil-define-key 'emacs org-mode-map (kbd "M-p") 'org-backward-heading-same-level)
+(use-package ox-ipynb
+  :straight (ox-ipynb
+             :type git
+             :host github
+             :repo "jkitchin/ox-ipynb")
+  :after org
+  :config
+  (require 'ox-ipynb))
 
-  (evil-define-key 'normal org-mode-map (kbd "M-n") 'org-babel-next-src-block)
-  (evil-define-key 'normal org-mode-map (kbd "M-p") 'org-babel-previous-src-block)
-  (evil-define-key 'emacs org-mode-map (kbd "M-n") 'org-babel-next-src-block)
-  (evil-define-key 'emacs org-mode-map (kbd "M-p") 'org-babel-previous-src-block)
-
-  (require 'org-protocol))
-
-;; (defun my-next-block (&optional arg)
-;;   "Move the cursor to the next org block. With argument ARG, do it that many times."
-;;   (interactive "p")
-;;   (when (ignore-errors (org-back-to-heading 'invisible-ok) t)
-;;     (let ((end (save-excursion (outline-next-heading) (point))))
-;;       (if (re-search-forward org-block-regexp end t arg)
-;;           (goto-char (match-beginning 0))
-;;         (user-error "No more org blocks")))))
-
-;; (defun my-prev-block (&optional arg)
-;;   "Move the cursor to the previous org block. With argument ARG, do it that many times."
-;;   (interactive "p")
-;;   (if (re-search-backward org-block-regexp nil t arg)
-;;       (goto-char (match-beginning 0))
-;;     (user-error "No previous org blocks")))
-
-;; (with-eval-after-load 'org
-;;   (define-key org-mode-map (kbd "C-c n") 'my-next-block)
-;;   (define-key org-mode-map (kbd "C-c p") 'my-prev-block))
-
-;; (with-eval-after-load 'evil
-;;     (evil-define-key 'normal org-mode-map (kbd "C-c n") 'org-babel-next-src-block)
-;;     (evil-define-key 'normal org-mode-map (kbd "C-c p") 'org-babel-previous-src-block)
-;;     (evil-define-key 'emacs org-mode-map (kbd "C-c n") 'org-babel-next-src-block)
-;;     (evil-define-key 'emacs org-mode-map (kbd "C-c p") 'org-babel-previous-src-block))
-
-(defun dw/search-org-files ()
-  (interactive)
-  (counsel-rg "" "~/Notes" nil "Search Notes: "))
+;; Use bullet characters instead of asterisks, plus set the header font sizes to something more palatable.  A fair amount of inspiration has been taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][this blog post]].
 
 (use-package org-superstar
   :after org
@@ -955,30 +960,6 @@
   :custom
   (org-superstar-remove-leading-stars t)
   (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
-
-(use-package ob-ipython
-  :after org)
-
-;; (use-package zmq
-;;   :ensure t
-;;   :after org)
-
-;; (use-package jupyter
-;;   :after zmq)
-
-(use-package org-pomodoro
-  :after org
-  :config
-  (setq org-pomodoro-start-sound "~/.dotfiles/.emacs.d/sounds/focus_bell.wav")
-  (setq org-pomodoro-short-break-sound "~/.dotfiles/.emacs.d/sounds/three_beeps.wav")
-  (setq org-pomodoro-long-break-sound "~/.dotfiles/.emacs.d/sounds/three_beeps.wav")
-  (setq org-pomodoro-finished-sound "~/.dotfiles/.emacs.d/sounds/meditation_bell.wav")
-
-  (dw/leader-key-def
-    "op"  '(org-pomodoro :which-key "pomodoro")))
-
-(use-package ox-reveal
-  :after org)
 
 (use-package evil-org
   :after org
@@ -995,9 +976,7 @@
   "oi"  '(:ignore t :which-key "insert")
   "oil" '(org-insert-link :which-key "insert link")
 
-  ;; "on"  '(org-toggle-narrow-to-subtree :which-key "toggle narrow")
-  "on"  '(org-next-block :which-key "next block")
-  "op"  '(org-previous-block :which-key "previous block")
+  "on"  '(org-toggle-narrow-to-subtree :which-key "toggle narrow")
 
   "os"  '(dw/counsel-rg-org-files :which-key "search notes")
 
@@ -1005,6 +984,10 @@
   "ot"  '(org-todo-list :which-key "todos")
   "oc"  '(org-capture t :which-key "capture")
   "ox"  '(org-export-dispatch t :which-key "export"))
+
+(defun dw/search-org-files ()
+  (interactive)
+  (counsel-rg "" "~/Notes" nil "Search Notes: "))
 
 (use-package org-make-toc
   :hook (org-mode . org-make-toc-mode))
@@ -1032,8 +1015,8 @@
 (use-package org-wild-notifier
   :after org
   :config
-                                        ; Make sure we receive notifications for non-TODO events
-                                        ; like those synced from Google Calendar
+  ;; Make sure we receive notifications for non-TODO events
+  ;; like those synced from Google Calendar
   (setq org-wild-notifier-keyword-whitelist nil)
   (setq org-wild-notifier-notification-title "Agenda Reminder")
   (setq org-wild-notifier-alert-time 15)
@@ -1084,6 +1067,7 @@
          (org-present-mode-quit . dw/org-present-quit-hook)))
 
 (use-package org-appear
+  :after org
   :hook (org-mode . org-appear-mode))
 
 (use-package ox-awesomecv
@@ -1224,39 +1208,48 @@
   :mode "\\.cmake\\'")
 
 (use-package python-mode
-  :mode "\\.py\\'"
-  :init
-  (setq python-shell-interpreter "/home/leon/mambaforge/bin/python3")
+    :mode "\\.py\\'"
+    :init
+    (setq python-shell-interpreter "/home/leon/mambaforge/bin/python3")
 
-  :custom
-  (dap-python-executable "/home/leon/mambaforge/bin/python3")
-  (dap-python-debugger 'debugpy)
+    :custom
+    (dap-python-executable "/home/leon/mambaforge/bin/python3")
+    (dap-python-debugger 'debugpy)
+    :config
+    (require 'dap-python))
+
+(use-package py-isort
+  :hook (python-mode . py-isort-before-save)
   :config
-  (require 'dap-python))
+  (setq py-isort-options '("--lines=88" "-m=3" "-tc" "-fgw=0" "-ca"))) ;
 
-;; (use-package lsp-pyright
-;;   :hook (python-mode . (lambda () (require 'lsp-pyright)))
-;;   :init (when (executable-find "python3")
-;;           (setq lsp-pyright-python-executable-cmd "python3")))
+;; (use-package py-autoflake
+;;       :hook (python-mode . py-autoflake-enable-on-save)
+;;       :config
+;;       (setq py-autoflake-options '("--expand-star-imports")))
 
-(use-package pyenv-mode
-  :ensure t)
+;; (use-package py-docformatter
+;;       :hook (python-mode . py-docformatter-enable-on-save)
+;;       :config
+;;       (setq py-docformatter-options '("--wrap-summaries=88" "--pre-summary-newline")))
 
-(use-package exec-path-from-shell
-  :ensure t
-  :init (exec-path-from-shell-initialize))
+(use-package python-docstring
+  :hook (python-mode . python-docstring-mode))
 
-(use-package pyvenv
-  :ensure t
-  :hook (python-mode . pyvenv-mode)
-  :init
-  (setenv "WORKON_HOME" "/home/leon/mambaforge/envs/")
-  :config
-  (setq pyvenv-workon "/home/leon/mambaforge/envs/")) ; Path to your virtual environments directory
+(use-package blacken
+  :hook (python-mode . blacken-mode)
+    :config (setq blacken-line-length '88))
 
-(use-package pythonic
-  :ensure t
-  :after python)
+(use-package python-black
+  :straight t
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+
+(defun leon/eglot-format-buffer ()
+  "Format current buffer according to LSP server."
+  (interactive)
+  (if (and (eq major-mode 'python-mode) (executable-find "black"))
+      (python-black-buffer)
+    (eglot--format-buffer)))
 
 (use-package
   conda
@@ -1264,11 +1257,18 @@
   ;; TODO: we need to activate the envs for python files but not for, e.g., jupyter repl buffer
   :hook (python-mode . (lambda () (conda-env-activate-for-buffer))))
 
-;; (use-package pyvenv
-;;   :after conda
-;;   :config
-;;   (setq pyvenv-workon "base")  ; Default venv
-;;   (pyvenv-tracking-mode 1))  ; Automatically use pyvenv-workon via dir-locals
+;; (use-package exec-path-from-shell
+;;   :ensure t
+;;   :init (exec-path-from-shell-initialize))
+
+(use-package pyvenv
+  :ensure t
+  :after conda
+  :hook (python-mode . pyvenv-mode)
+  :init
+  (setenv "WORKON_HOME" "/home/leon/mambaforge/envs/")
+  :config
+  (setq pyvenv-workon "/home/leon/mambaforge/envs/"))
 
 (use-package ein
   :config
@@ -1294,21 +1294,21 @@
     (evil-set-initial-state 'ein:notebook-multilang-mode 'insert))
   (add-hook 'ein:notebook-mode-hook 'custom:notebook-mode-hook))
 
-(use-package company
-  :ensure t
-  :config
-  (setq company-idle-delay .2)
-  (setq company-minimum-prefix-length 2)
-  (add-hook 'ein:notebook-multilang-mode-hook 'company-mode))  ;; enable company-mode only in ein
+;; (use-package company
+;;   :ensure t
+;;   :config
+;;   (setq company-idle-delay .2)
+;;   (setq company-minimum-prefix-length 2)
+;;   (add-hook 'ein:notebook-multilang-mode-hook 'company-mode))  ;; enable company-mode only in ein
 
-(use-package company-prescient
-  :after company
-  :config
-  (company-prescient-mode))
+;; (use-package company-prescient
+;;   :after company
+;;   :config
+;;   (company-prescient-mode))
 
-(use-package company-box
-  :after company
-  :hook (company-mode . company-box-mode))
+;; (use-package company-box
+;;   :after company
+;;   :hook (company-mode . company-box-mode))
 
 (add-hook 'emacs-lisp-mode-hook #'flycheck-mode)
 
@@ -1316,26 +1316,18 @@
   :ensure t
   :bind (("C-h f" . helpful-callable)
          ("C-h v" . helpful-variable)
-         ("C-h k" . helpful-key)))
+         ("C-h k" . helpful-key))
+  :custom
+  (counsel-describe-function-function #'helpful-callable)
+  (counsel-describe-variable-function #'helpful-variable))
 
-;; (use-package helpful
-;;   :custom
-;;   (counsel-describe-function-function #'helpful-callable)
-;;   (counsel-describe-variable-function #'helpful-variable)
-;;   :bind
-;;   ([remap describe-function] . helpful-function)
-;;   ([remap describe-symbol] . helpful-symbol)
-;;   ([remap describe-variable] . helpful-variable)
-;;   ([remap describe-command] . helpful-command)
-;;   ([remap describe-key] . helpful-key))
+(dw/leader-key-def
+  "e"   '(:ignore t :which-key "eval")
+  "eb"  '(eval-buffer :which-key "eval buffer"))
 
-;; (dw/leader-key-def
-;;   "e"   '(:ignore t :which-key "eval")
-;;   "eb"  '(eval-buffer :which-key "eval buffer"))
-
-;; (dw/leader-key-def
-;;   :keymaps '(visual)
-;;   "er" '(eval-region :which-key "eval region"))
+(dw/leader-key-def
+  :keymaps '(visual)
+  "er" '(eval-region :which-key "eval region"))
 
 (use-package web-mode
   :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
@@ -1391,6 +1383,13 @@
   (add-to-list 'flycheck-checkers 'python-ruff)
   :init (global-flycheck-mode))
 
+(use-package flycheck-pycheckers
+:ensure t
+:after flycheck
+:config
+(with-eval-after-load 'flycheck
+  (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup)))
+
 ;; code parsing
 (use-package tree-sitter
   :hook (python-mode . tree-sitter-mode)
@@ -1441,23 +1440,6 @@
   :mode "\\.yml\\'"
   ;; :hook (yaml-mode . highlight-indent-guides-mode)
   :config (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode)))
-
-(use-package python-black
-  :straight t
-  :hook (python-mode . python-black-on-save-mode-enable-dwim))
-
-(defun leon/eglot-format-buffer ()
-  "Format current buffer according to LSP server."
-  (interactive)
-  (if (and (eq major-mode 'python-mode) (executable-find "black"))
-      (python-black-buffer)
-    (eglot--format-buffer)))
-
-(use-package
-  py-isort
-  :hook (before-save . py-isort-before-save)
-  :config
-  (setq py-isort-options '("--multi-line=3" "--trailing-comma" "--force-grid-wrap=0" "--use-parentheses" "--line-width=88" "--order-by-type")))
 
 (use-package yasnippet-snippets
   :defer t
@@ -1654,6 +1636,12 @@
   :config
   (setq vterm-max-scrollback 10000)
   )
+
+(use-package eat
+  :ensure t
+  :config
+  (eat-eshell-mode)
+  (setq eshell-visual-commands '()))
 
 (use-package markdown-mode
   :commands (markdown-mode gfm-mode)

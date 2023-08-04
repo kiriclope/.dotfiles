@@ -26,6 +26,7 @@ alias tunneltoParis="tunnelto181"
 #####################
 
 alias ssh_minibaps="ssh -tXYC leon@84.88.67.74 -p 4022 'ssh -tXYC 172.26.20.44' "
+alias minibaps="ssh -tXYC 172.26.20.44"
 
 alias ssh_bcn="ssh -XYC leon@neurocomp.fcrb.es -p 4022"
 alias tunneltobcn="ssh -L 4022:127.0.0.1:22 leon@neurocomp.fcrb.es -p 4022"
