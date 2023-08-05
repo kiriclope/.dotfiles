@@ -136,7 +136,7 @@ fi
 # <<< conda initialize <<<
 
 export CONDA_PATH="/home/leon/mambaforge/bin:/home/leon/mambaforge/condabin:"
-# export LD_LIBRARY_PATH=$HOME/mambaforge/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$HOME/mambaforge/lib:$LD_LIBRARY_PATH
 
 # We're in Emacs, yo
 export VISUAL=emacsclient
