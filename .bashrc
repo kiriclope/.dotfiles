@@ -178,8 +178,8 @@ if [ "$HOSTNAME" = "minibaps" ]; then
     export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:$HOME/local/include/"
     export PKG_CONFIG_PATH="$HOME/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-    PERL5LIB="$HOME/local/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-    PERL_LOCAL_LIB_ROOT="$HOME/local/${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-    PERL_MB_OPT="--install_base \"$HOME/leon/local/\""; export PERL_MB_OPT;
-    PERL_MM_OPT="INSTALL_BASE=$HOME/local/"; export PERL_MM_OPT;
+    export PERL5LIB="$HOME/local/lib/perl5:$PERL5LIB"
+    export PERL_LOCAL_LIB_ROOT="$HOME/local/:$PERL_LOCAL_LIB_ROOT:"
+    export PERL_MB_OPT="--install_base \"$HOME/leon/local/\":$PERL_MB_OPT$"
+    export PERL_MM_OPT="INSTALL_BASE=$HOME/local/:$PERL_MM_OPT"
 fi
