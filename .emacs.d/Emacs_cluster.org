@@ -247,13 +247,13 @@ Set up ELPA, MELPA, and Org package repositories and load =use-package= to manag
   (use-package exec-path-from-shell
     :ensure t
     :init
-    (exec-path-from-shell-initialize))
-
-  (setq exec-path (append '("/home/leon/mambaforge/bin") exec-path))
+    (exec-path-from-shell-initialize)
+    :config
+    (exec-path-from-shell-copy-env "CONDA_PATH"))
 #+end_src
 
 #+RESULTS:
-| /home/leon/mambaforge/bin | /usr/local/sbin/ | /usr/local/bin/ | /usr/sbin/ | /usr/bin/ | /sbin/ | /bin/ | /usr/games/ | /usr/local/games/ | /snap/bin/ | /snap/bin/ | /usr/lib/emacs/28.1/x86_64-linux-gnu/ |
+: t
 
 * Keep .emacs.d Clean
 

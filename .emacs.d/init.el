@@ -34,7 +34,10 @@
 (use-package exec-path-from-shell
   :ensure t
   :init
-  (exec-path-from-shell-initialize))
+  (exec-path-from-shell-initialize)
+  :config
+  (dolist (var '("MANPATH" "CONDA_PATH"))
+  (add-to-list 'exec-path-from-shell-variables var)))
 
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
 (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
@@ -1618,8 +1621,8 @@
   (setq eshell-destroy-buffer-when-process-dies t)
   (setq eshell-visual-commands '("htop" "zsh" "vim")))
 
-;; (use-package eterm-256color
-;;   :hook (term-mode . eterm-256color-mode))
+(use-package eterm-256color
+  :hook (term-mode . eterm-256color-mode))
 
 (use-package fish-completion
   :disabled
