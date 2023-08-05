@@ -166,9 +166,6 @@ if [ "$HOSTNAME" = "minibaps" ]; then
     command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
     eval "$(pyenv init -)"
 
-    # zmq
-    export LD_LIBRARY_PATH=$HOME/local/zeromq/lib:$LD_LIBRARY_PATH
-    export PKG_CONFIG_PATH=$HOME/local/zeromq/lib/pkgconfig:$PKG_CONFIG_PATH
 
     # local
     export PATH="$HOME/local/bin:$PATH"
@@ -178,7 +175,8 @@ if [ "$HOSTNAME" = "minibaps" ]; then
     export LD_LIBRARY_PATH="$HOME/local/usr/lib64:$LD_LIBRARY_PATH"
 
     export MANPATH="$HOME/local/share/man:$MANPATH"
-    export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:"$HOME/local/include/"
+    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:$HOME/local/include/"
+    export PKG_CONFIG_PATH="$HOME/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 
     PERL5LIB="$HOME/local/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
     PERL_LOCAL_LIB_ROOT="$HOME/local/${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
