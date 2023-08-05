@@ -1,4 +1,5 @@
 #+TITLE: Emacs Base Configuration
+#+STARTUP: fold
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
 This is an ongoing evolution of my original Emacs configuration files, inspired by a bunch of resources I've found online.
@@ -337,110 +338,110 @@ Some tips can be found here:
 
 #+begin_src emacs-lisp
 
-  (use-package undo-tree
-    :init
-    (setq undo-tree-auto-save-history t)
-    (global-undo-tree-mode 1))
+    (use-package undo-tree
+      :init
+      (setq undo-tree-auto-save-history t)
+      (global-undo-tree-mode 1))
 
-  (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll nil)
-    (setq evil-want-C-d-scroll nil)
-    (setq evil-want-C-i-jump nil)
-    (setq evil-respect-visual-line-mode t)
-    (setq evil-undo-system 'undo-tree)
-    :config
-    (evil-mode 1)
+    (use-package evil
+      :init
+      (setq evil-want-integration t)
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll nil)
+      (setq evil-want-C-d-scroll nil)
+      (setq evil-want-C-i-jump nil)
+      (setq evil-respect-visual-line-mode t)
+      (setq evil-undo-system 'undo-tree)
+      :config
+      (evil-mode 1)
+      (require 'subr-x)
+      ;; Set Emacs state modes
+      (dolist (mode '(custom-mode
+                      eshell-mode
+                      git-rebase-mode
+                      term-mode))
+        (add-to-list 'evil-emacs-state-modes mode))
 
-    ;; Set Emacs state modes
-    (dolist (mode '(custom-mode
-                    eshell-mode
-                    git-rebase-mode
-                    term-mode))
-      (add-to-list 'evil-emacs-state-modes mode))
+      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
 
-    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+      ;; Basic movement
+      (define-key evil-normal-state-map (kbd "C-f") 'evil-forward-char)
+      (define-key evil-normal-state-map (kbd "C-b") 'evil-backward-char)
+      (define-key evil-normal-state-map (kbd "C-n") 'evil-next-line)
+      (define-key evil-normal-state-map (kbd "C-p") 'evil-previous-line)
 
-    ;; Basic movement
-    (define-key evil-normal-state-map (kbd "C-f") 'evil-forward-char)
-    (define-key evil-normal-state-map (kbd "C-b") 'evil-backward-char)
-    (define-key evil-normal-state-map (kbd "C-n") 'evil-next-line)
-    (define-key evil-normal-state-map (kbd "C-p") 'evil-previous-line)
+      ;; Word movement
+      (define-key evil-normal-state-map (kbd "M-f") 'evil-forward-word-end)
+      (define-key evil-normal-state-map (kbd "M-b") 'evil-backward-word-begin)
+      (define-key evil-insert-state-map (kbd "M-f") 'evil-forward-word-end)
+      (define-key evil-insert-state-map (kbd "M-b") 'evil-backward-word-begin)
 
-    ;; Word movement
-    (define-key evil-normal-state-map (kbd "M-f") 'evil-forward-word-end)
-    (define-key evil-normal-state-map (kbd "M-b") 'evil-backward-word-begin)
-    (define-key evil-insert-state-map (kbd "M-f") 'evil-forward-word-end)
-    (define-key evil-insert-state-map (kbd "M-b") 'evil-backward-word-begin)
+      ;; python jump to prev/next def
+      (defun my-python-nav-forward-defun ()
+        (interactive)
+        (let ((current-pos (point)))
+          (python-nav-forward-defun)
+          (when (equal (point) current-pos)
+            (message "Reached the last def in the file"))))
 
-    ;; python jump to prev/next def
-    (defun my-python-nav-forward-defun ()
-      (interactive)
-      (let ((current-pos (point)))
-        (python-nav-forward-defun)
-        (when (equal (point) current-pos)
-          (message "Reached the last def in the file"))))
+      (defun my-python-nav-backward-defun ()
+        (interactive)
+        (let ((current-pos (point)))
+          (python-nav-backward-defun)
+          (when (equal (point) current-pos)
+            (message "Reached the first def in the file"))))
 
-    (defun my-python-nav-backward-defun ()
-      (interactive)
-      (let ((current-pos (point)))
-        (python-nav-backward-defun)
-        (when (equal (point) current-pos)
-          (message "Reached the first def in the file"))))
+      ;; (evil-define-key 'normal python-mode-map (kbd "C-f n") 'my-python-nav-forward-defun)
+      ;; (evil-define-key 'normal python-mode-map (kbd "C-f p") 'my-python-nav-backward-defun)
+      ;; (evil-define-key 'emacs python-mode-map (kbd "C-f n") 'my-python-nav-forward-defun)
+      ;; (evil-define-key 'emacs python-mode-map (kbd "C-f p") 'my-python-nav-backward-defun)
 
-    ;; (evil-define-key 'normal python-mode-map (kbd "C-f n") 'my-python-nav-forward-defun)
-    ;; (evil-define-key 'normal python-mode-map (kbd "C-f p") 'my-python-nav-backward-defun)
-    ;; (evil-define-key 'emacs python-mode-map (kbd "C-f n") 'my-python-nav-forward-defun)
-    ;; (evil-define-key 'emacs python-mode-map (kbd "C-f p") 'my-python-nav-backward-defun)
+      ;; Line movement
+      (define-key evil-normal-state-map (kbd "C-a") 'move-beginning-of-line)
+      (define-key evil-normal-state-map (kbd "C-e") 'move-end-of-line)
+      (define-key evil-insert-state-map (kbd "C-e") 'evil-end-of-line)
+      (define-key evil-insert-state-map (kbd "C-a") 'evil-beginning-of-line)
 
-    ;; Line movement
-    (define-key evil-normal-state-map (kbd "C-a") 'move-beginning-of-line)
-    (define-key evil-normal-state-map (kbd "C-e") 'move-end-of-line)
-    (define-key evil-insert-state-map (kbd "C-e") 'evil-end-of-line)
-    (define-key evil-insert-state-map (kbd "C-a") 'evil-beginning-of-line)
+      (define-key evil-normal-state-map (kbd "M-$") 'evil-scroll-line-down)
+      (define-key evil-normal-state-map (kbd "C-$") 'evil-scroll-line-up)
 
-    (define-key evil-normal-state-map (kbd "M-$") 'evil-scroll-line-down)
-    (define-key evil-normal-state-map (kbd "C-$") 'evil-scroll-line-up)
+      (define-key evil-normal-state-map (kbd "M-n") 'next-buffer)
+      (define-key evil-normal-state-map (kbd "M-p") 'previous-buffer)
 
-    (define-key evil-normal-state-map (kbd "M-n") 'next-buffer)
-    (define-key evil-normal-state-map (kbd "M-p") 'previous-buffer)
+      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+      (evil-define-key 'normal org-mode-map (kbd "M-n") 'org-babel-next-src-block)
 
-    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-    (evil-define-key 'normal org-mode-map (kbd "M-n") 'org-babel-next-src-block)
+      (evil-define-key 'normal org-mode-map (kbd "M-p") 'org-babel-previous-src-block)
+      (evil-define-key 'emacs org-mode-map (kbd "M-n") 'org-babel-next-src-block)
+      (evil-define-key 'emacs org-mode-map (kbd "M-p") 'org-babel-previous-src-block)
 
-    (evil-define-key 'normal org-mode-map (kbd "M-p") 'org-babel-previous-src-block)
-    (evil-define-key 'emacs org-mode-map (kbd "M-n") 'org-babel-next-src-block)
-    (evil-define-key 'emacs org-mode-map (kbd "M-p") 'org-babel-previous-src-block)
+      ;; (evil-global-set-key 'normal (kbd "M-n") 'next-buffer)
+      ;; (evil-global-set-key 'normal (kbd "M-p") 'previous-buffer)
 
-    ;; (evil-global-set-key 'normal (kbd "M-n") 'next-buffer)
-    ;; (evil-global-set-key 'normal (kbd "M-p") 'previous-buffer)
+      (defun dw/dont-arrow-me-bro ()
+        (interactive)
+        (message "Arrow keys are bad, you know?"))
 
-    (defun dw/dont-arrow-me-bro ()
-      (interactive)
-      (message "Arrow keys are bad, you know?"))
+      ;; Disable arrow keys in normal and vsual modes
+      ;; (define-key evil-normal-state-map (kbd "<left>") 'dw/dont-arrow-me-bro)
+      ;; (define-key evil-normal-state-map (kbd "<right>") 'dw/dont-arrow-me-bro)
+      ;; (define-key evil-normal-state-map (kbd "<down>") 'dw/dont-arrow-me-bro)
+      ;; (define-key evil-normal-state-map (kbd "<up>") 'dw/dont-arrow-me-bro)
+      ;; (evil-global-set-key 'motion (kbd "<left>") 'dw/dont-arrow-me-bro)
+      ;; (evil-global-set-key 'motion (kbd "<right>") 'dw/dont-arrow-me-bro)
+      ;; (evil-global-set-key 'motion (kbd "<down>") 'dw/dont-arrow-me-bro)
+      ;; (evil-global-set-key 'motion (kbd "<up>") 'dw/dont-arrow-me-bro)
 
-    ;; Disable arrow keys in normal and vsual modes
-    ;; (define-key evil-normal-state-map (kbd "<left>") 'dw/dont-arrow-me-bro)
-    ;; (define-key evil-normal-state-map (kbd "<right>") 'dw/dont-arrow-me-bro)
-    ;; (define-key evil-normal-state-map (kbd "<down>") 'dw/dont-arrow-me-bro)
-    ;; (define-key evil-normal-state-map (kbd "<up>") 'dw/dont-arrow-me-bro)
-    ;; (evil-global-set-key 'motion (kbd "<left>") 'dw/dont-arrow-me-bro)
-    ;; (evil-global-set-key 'motion (kbd "<right>") 'dw/dont-arrow-me-bro)
-    ;; (evil-global-set-key 'motion (kbd "<down>") 'dw/dont-arrow-me-bro)
-    ;; (evil-global-set-key 'motion (kbd "<up>") 'dw/dont-arrow-me-bro)
+      (evil-set-initial-state 'messages-buffer-mode 'normal)
+      (evil-set-initial-state 'dashboard-mode 'normal))
 
-    (evil-set-initial-state 'messages-buffer-mode 'normal)
-    (evil-set-initial-state 'dashboard-mode 'normal))
-
-  (use-package evil-collection
-    :after evil
-    :init
-    (setq evil-collection-company-use-tng nil)
-    :config
-    (evil-collection-init))
+    (use-package evil-collection
+      :after evil
+      :init
+      (setq evil-collection-company-use-tng nil)
+      :config
+      (evil-collection-init))
 
 #+end_src
 
@@ -1621,9 +1622,9 @@ Set up Org Mode with a baseline configuration.  The following sections will add 
           org-fontify-quote-and-verse-blocks t
           org-src-tab-acts-natively t
           org-edit-src-content-indentation 2
-          org-hide-block-startup nil
+          org-hide-block-startup t
           org-src-preserve-indentation nil
-          org-startup-folded 'fold
+          org-startup-folded nil
           org-cycle-separator-lines 2
           org-capture-bookmark nil)
 
@@ -1665,7 +1666,7 @@ Set up Org Mode with a baseline configuration.  The following sections will add 
   #+end_src
 
   #+RESULTS:
-  | org-tempo-setup | (closure (bootstrap-version t) nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | rainbow-mode | org-appear-mode | evil-org-mode | org-superstar-mode | ob-ipython-auto-configure-kernels | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-make-toc-mode | my/org-block-templates | my/org-fonts | dw/org-mode-setup | dw/org-mode-visual-fill | (closure ((mode . org-mode-hook) (--dolist-tail--) bootstrap-version t) nil (display-line-numbers-mode 0)) |
+  | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | org-tempo-setup | (closure (bootstrap-version t) nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | rainbow-mode | org-appear-mode | evil-org-mode | org-superstar-mode | ob-ipython-auto-configure-kernels | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-make-toc-mode | my/org-block-templates | my/org-fonts | dw/org-mode-setup | dw/org-mode-visual-fill | (closure ((mode . org-mode-hook) (--dolist-tail--) bootstrap-version t) nil (display-line-numbers-mode 0)) |
 
 ** ob-ipython
 #+begin_src emacs-lisp
@@ -3006,7 +3007,7 @@ Now you can use M-x org-mime-htmlize inside of a mail composition buffer to conv
                      :pre-build ("make"))
     ;; :bind ("s-b" 'webkit)
     :init
-    (setq webkit-own-window -1)
+    (setq webkit-own-window nil)
 
     :config
     ;; If you don't care so much about privacy and want to give your data to google
@@ -3026,13 +3027,13 @@ Now you can use M-x org-mime-htmlize inside of a mail composition buffer to conv
 
     ;; See the above explination in the Background section
     ;; This must be set before webkit.el is loaded so certain hooks aren't installed
-    (setq webkit-own-window -1)
+    (setq webkit-own-window nil)
 
     ;; Set webkit as the default browse-url browser
     (setq browse-url-browser-function 'webkit-browse-url)
 
     ;; Force webkit to always open a new session instead of reusing a current one
-    (setq webkit-browse-url-force-new t)
+    (setq webkit-browse-url-force-new nil)
 
     ;; Globally disable javascript
     (add-hook 'webkit-new-hook #'webkit-enable-javascript)

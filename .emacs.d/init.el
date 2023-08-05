@@ -34,10 +34,9 @@
 (use-package exec-path-from-shell
   :ensure t
   :init
-  (exec-path-from-shell-initialize)
-  :config
-  (dolist (var '("MANPATH" "CONDA_PATH"))
-  (add-to-list 'exec-path-from-shell-variables var)))
+  ;; (setq exec-path-from-shell-arguments nil)
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-copy-envs '("PATH" "MANPATH" "CONDA_PATH"))))
 
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
 (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
@@ -81,7 +80,7 @@
   (setq evil-undo-system 'undo-tree)
   :config
   (evil-mode 1)
-
+  (require 'subr-x)
   ;; Set Emacs state modes
   (dolist (mode '(custom-mode
                   eshell-mode
@@ -887,9 +886,9 @@
         org-fontify-quote-and-verse-blocks t
         org-src-tab-acts-natively t
         org-edit-src-content-indentation 2
-        org-hide-block-startup nil
+        org-hide-block-startup t
         org-src-preserve-indentation nil
-        org-startup-folded 'content
+        org-startup-folded nil
         org-cycle-separator-lines 2
         org-capture-bookmark nil)
 
@@ -1107,8 +1106,71 @@
   :config
   (setq git-link-open-in-browser t)
   (dw/leader-key-def
-    "gL"  'git-link)
-  )
+    "gL"  'git-link))
+
+(use-package git-gutter
+  ;; :straight git-gutter-fringe
+  :diminish
+  :hook ((text-mode . git-gutter-mode)
+         (prog-mode . git-gutter-mode))
+  :config
+  (setq git-gutter:update-interval 2)
+  (require 'git-gutter-fringe)
+  (set-face-foreground 'git-gutter-fr:added "LightGreen")
+    (fringe-helper-define 'git-gutter-fr:added nil
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      ".........."
+      ".........."
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      ".........."
+      ".........."
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX")
+
+    (set-face-foreground 'git-gutter-fr:modified "LightGoldenrod")
+    (fringe-helper-define 'git-gutter-fr:modified nil
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      ".........."
+      ".........."
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      ".........."
+      ".........."
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX")
+
+    (set-face-foreground 'git-gutter-fr:deleted "LightCoral")
+    (fringe-helper-define 'git-gutter-fr:deleted nil
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      ".........."
+      ".........."
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      ".........."
+      ".........."
+      "XXXXXXXXXX"
+      "XXXXXXXXXX"
+      "XXXXXXXXXX")
+
+  ;; These characters are used in terminal mode
+  (setq git-gutter:modified-sign "≡")
+  (setq git-gutter:added-sign "≡")
+  (setq git-gutter:deleted-sign "≡")
+  (set-face-foreground 'git-gutter:added "LightGreen")
+  (set-face-foreground 'git-gutter:modified "LightGoldenrod")
+  (set-face-foreground 'git-gutter:deleted "LightCoral"))
 
 (defun dw/switch-project-action ()
   "Switch to a workspace with the project name and start `magit-status'."
@@ -1274,10 +1336,6 @@
   :config (conda-env-autoactivate-mode t)
   ;; TODO: we need to activate the envs for python files but not for, e.g., jupyter repl buffer
   :hook (python-mode . (lambda () (conda-env-activate-for-buffer))))
-
-;; (use-package exec-path-from-shell
-;;   :ensure t
-;;   :init (exec-path-from-shell-initialize))
 
 (use-package pyvenv
   :ensure t
@@ -1486,6 +1544,85 @@
          typescript-mode
          python-mode
          js2-mode))
+
+(use-package app-launcher
+    :straight '(app-launcher :host github :repo "SebastienWae/app-launcher"))
+
+(use-package mu4e-alert
+
+  :after mu4e
+  :config
+  ;; Show unread emails from all inboxes
+  (setq mu4e-alert-interesting-mail-query mu4e-inbox-query)
+
+  ;; Show notifications for mails already notified
+  (setq mu4e-alert-notify-repeated-mails nil)
+
+  (mu4e-alert-enable-notifications))
+
+(use-package all-the-icons)
+
+(use-package webkit
+  :straight (:type git
+                   :host github
+                   :repo "akirakyle/emacs-webkit"
+                   :files (:defaults "*.js" "*.css" "*.so")
+                   :pre-build ("make"))
+  ;; :bind ("s-b" 'webkit)
+  :init
+  (setq webkit-own-window nil)
+
+  :config
+  ;; If you don't care so much about privacy and want to give your data to google
+  (setq webkit-search-prefix "https://google.com/search?q=")
+
+  ;; Specify a different set of characters use in the link hints
+  ;; For example the following are more convienent if you use dvorak
+  (setq webkit-ace-chars "aoeuidhtns")
+
+  ;; If you want history saved in a different place or
+  ;; Set to `nil' to if you don't want history saved to file (will stay in memory)
+  (setq webkit-history-file "~/.emacs.d/webkit/history")
+
+  ;; If you want cookies saved in a different place or
+  ;; Set to `nil' to if you don't want cookies saved
+  (setq webkit-cookie-file "~/.emacs.d/webkit/cookies")
+
+  ;; See the above explination in the Background section
+  ;; This must be set before webkit.el is loaded so certain hooks aren't installed
+  (setq webkit-own-window nil)
+
+  ;; Set webkit as the default browse-url browser
+  (setq browse-url-browser-function 'webkit-browse-url)
+
+  ;; Force webkit to always open a new session instead of reusing a current one
+  (setq webkit-browse-url-force-new nil)
+
+  ;; Globally disable javascript
+  (add-hook 'webkit-new-hook #'webkit-enable-javascript)
+
+  ;; Override the "loading:" mode line indicator with an icon from `all-the-icons.el'
+  ;; You could also use a unicode icon like ↺
+  (defun webkit--display-progress (progress)
+    (setq webkit--progress-formatted
+          (if (equal progress 100.0)
+              ""
+            (format "%s%.0f%%  " (all-the-icons-faicon "spinner") progress)))
+    (force-mode-line-update))
+
+  ;; Set action to be taken on a download request. Predefined actions are
+  ;; `webkit-download-default', `webkit-download-save', and `webkit-download-open'
+  ;; where the save function saves to the download directory, the open function
+  ;; opens in a temp buffer and the default function interactively prompts.
+  (setq webkit-download-action-alist '(("\\.pdf\\'" . webkit-download-open)
+                                       ("\\.png\\'" . webkit-download-save)
+                                       (".*" . webkit-download-default)))
+
+  ;; Globally use a proxy
+  ;; (add-hook 'webkit-new-hook (lambda () (webkit-set-proxy "socks://localhost:8000")))
+
+  ;; Globally use the simple dark mode
+  (setq webkit-dark-mode t))
 
 (defun read-file (file-path)
   (with-temp-buffer
