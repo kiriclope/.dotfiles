@@ -147,11 +147,8 @@ export EDITOR="$VISUAL"
 
 
 if [ "$HOSTNAME" = "Persephone" ]; then
-    fan='sudo echo "level full-speed" > /proc/acpi/ibm/fan'
-    export PATH=$PATH:/home/leon/.nexustools
-    export PATH=$PATH:/snap/bin
-    export PATH=$PATH:~/.local/bin
-    export PATH=$PATH:/usr/bin
+    export PATH="$PATH:/snap/bin"
+    export PATH="$PATH:~/.local/bin"
 
     # flatpak
     export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:/home/leon/.local/share/flatpak/exports/share:${XDG_DATA_DIRS}"
