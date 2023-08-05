@@ -159,27 +159,26 @@ fi
 
 if [ "$HOSTNAME" = "minibaps" ]; then
     export XDG_RUNTIME_DIR="/tmp/runtime-leon"
-    export INFOPATH=$INFOPATH:/usr/share/info:/usr/local/share/info:/home/leon/mambaforge/share/info
+    export INFOPATH=$INFOPATH:/usr/share/info:/usr/.local/share/info:/home/leon/mambaforge/share/info
 
     # pyenv
     export PYENV_ROOT="$HOME/.pyenv"
     command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
     eval "$(pyenv init -)"
 
+    # .local
+    export PATH="$HOME/.local/bin:$PATH"
+    export PATH="$HOME/.local/libexec/:$PATH"
 
-    # local
-    export PATH="$HOME/local/bin:$PATH"
-    export PATH="$HOME/local/libexec/:$PATH"
+    export LD_LIBRARY_PATH="$HOME/.local/usr/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="$HOME/.local/usr/lib64:$LD_LIBRARY_PATH"
 
-    export LD_LIBRARY_PATH="$HOME/local/usr/lib:$LD_LIBRARY_PATH"
-    export LD_LIBRARY_PATH="$HOME/local/usr/lib64:$LD_LIBRARY_PATH"
+    export MANPATH="$HOME/.local/share/man:$MANPATH"
+    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:$HOME/.local/include/"
+    export PKG_CONFIG_PATH="$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-    export MANPATH="$HOME/local/share/man:$MANPATH"
-    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:$HOME/local/include/"
-    export PKG_CONFIG_PATH="$HOME/local/lib/pkgconfig:$PKG_CONFIG_PATH"
-
-    export PERL5LIB="$HOME/local/lib/perl5:$PERL5LIB"
-    export PERL_LOCAL_LIB_ROOT="$HOME/local/:$PERL_LOCAL_LIB_ROOT:"
-    export PERL_MB_OPT="--install_base \"$HOME/leon/local/\":$PERL_MB_OPT$"
-    export PERL_MM_OPT="INSTALL_BASE=$HOME/local/:$PERL_MM_OPT"
+    export PERL5LIB="$HOME/.local/lib/perl5:$PERL5LIB"
+    export PERL_LOCAL_LIB_ROOT="$HOME/.local/:$PERL_LOCAL_LIB_ROOT:"
+    export PERL_MB_OPT="--install_base \"$HOME/leon/.local/\":$PERL_MB_OPT$"
+    export PERL_MM_OPT="INSTALL_BASE=$HOME/.local/:$PERL_MM_OPT"
 fi
