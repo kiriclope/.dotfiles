@@ -34,8 +34,7 @@
 (use-package exec-path-from-shell
   :ensure t
   :init
-  (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize)))
+  (exec-path-from-shell-initialize))
 
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
 (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
@@ -441,6 +440,9 @@
   (org-reveal)
   (org-show-subtree)
   (forward-line))
+
+(use-package hydra
+  :defer t)
 
 (use-package savehist
   :config
@@ -848,7 +850,7 @@
   (add-to-list 'org-structure-template-alist '("json" . "src json")))
 
 ;; Org mode
-(setq-default fill-column 120)
+(setq-default fill-column 80)
 
 ;; Turn on indentation and auto-fill mode for Org files
 (defun dw/org-mode-setup ()
@@ -1218,38 +1220,51 @@
     :config
     (require 'dap-python))
 
-(use-package py-isort
-  :hook (python-mode . py-isort-before-save)
-  :config
-  (setq py-isort-options '("--lines=88" "-m=3" "-tc" "-fgw=0" "-ca"))) ;
+;; (use-package py-isort
+;;   :hook (python-mode . py-isort-before-save)
+;;   :config
+;;   (setq py-isort-options '("--lines=88" "-m=3" "-tc" "-fgw=0" "-ca"))) ;
 
-;; (use-package py-autoflake
-;;       :hook (python-mode . py-autoflake-enable-on-save)
-;;       :config
-;;       (setq py-autoflake-options '("--expand-star-imports")))
-
-;; (use-package py-docformatter
-;;       :hook (python-mode . py-docformatter-enable-on-save)
-;;       :config
-;;       (setq py-docformatter-options '("--wrap-summaries=88" "--pre-summary-newline")))
-
-(use-package python-docstring
-  :hook (python-mode . python-docstring-mode))
-
-(use-package blacken
-  :hook (python-mode . blacken-mode)
-    :config (setq blacken-line-length '88))
-
-(use-package python-black
-  :straight t
-  :hook (python-mode . python-black-on-save-mode-enable-dwim))
-
-(defun leon/eglot-format-buffer ()
-  "Format current buffer according to LSP server."
+(defun call-isort ()
+  "Call the isort command on the current buffer"
   (interactive)
-  (if (and (eq major-mode 'python-mode) (executable-find "black"))
-      (python-black-buffer)
-    (eglot--format-buffer)))
+  (shell-command-on-region (point-min)
+                           (point-max)
+                           "isort -"
+                           (current-buffer)
+                           t))
+
+(add-hook 'python-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'call-isort nil t)))
+
+  ;; (use-package py-autoflake
+  ;;       :hook (python-mode . py-autoflake-enable-on-save)
+  ;;       :config
+  ;;       (setq py-autoflake-options '("--expand-star-imports")))
+
+  ;; (use-package py-docformatter
+  ;;       :hook (python-mode . py-docformatter-enable-on-save)
+  ;;       :config
+  ;;       (setq py-docformatter-options '("--wrap-summaries=88" "--pre-summary-newline")))
+
+  (use-package python-docstring
+    :hook (python-mode . python-docstring-mode))
+
+  (use-package blacken
+    :hook (python-mode . blacken-mode)
+      :config (setq blacken-line-length '88))
+
+  (use-package python-black
+    :straight t
+    :hook (python-mode . python-black-on-save-mode-enable-dwim))
+
+  (defun leon/eglot-format-buffer ()
+    "Format current buffer according to LSP server."
+    (interactive)
+    (if (and (eq major-mode 'python-mode) (executable-find "black"))
+        (python-black-buffer)
+      (eglot--format-buffer)))
 
 (use-package
   conda
