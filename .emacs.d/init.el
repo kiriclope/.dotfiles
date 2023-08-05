@@ -1701,6 +1701,10 @@
   (setq eshell-destroy-buffer-when-process-dies t)
   (setq eshell-visual-commands '("htop" "zsh" "vim")))
 
+(use-package eterm-256color
+  :ensure t
+  :hook (term-mode . eterm-256color-mode))
+
 (use-package fish-completion
   :disabled
   :hook (eshell-mode . fish-completion-mode))
