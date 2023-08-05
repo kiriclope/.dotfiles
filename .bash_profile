@@ -4,7 +4,7 @@ if [ -r ~/.bashrc ]; then
    source ~/.bashrc
 fi
 
-if [ "$HOSTNAME" = "minibaps" ]; then
+if [ "$HOSTNAME" = "Persephone" ]; then
     OPENAI_API_KEY=$(pass openai)
     RMK_PWD=$(pass rmk)
 
