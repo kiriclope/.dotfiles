@@ -300,8 +300,8 @@
 
 (use-package
   doom-modeline
-  ;; :if (not (display-graphic-p))
   :init
+  (setq doom-modeline-support-imenu t)
   (setq doom-modeline-env-enable-python t)
   (setq doom-modeline-env-enable-go nil)
   (setq doom-modeline-buffer-encoding 'nondefault)
@@ -309,28 +309,35 @@
   (setq doom-modeline-persp-icon nil)
   (setq doom-modeline-persp-name nil)
   :config
-  (setq doom-modeline-minor-modes nil)
-  (setq doom-modeline-buffer-state-icon nil)
+  (setq doom-modeline-project-detection 'auto)
+  (setq doom-modeline-buffer-file-name-style 'auto)
   (setq doom-modeline-icon nil)
-  (doom-modeline-mode 1)
-  (progn
-    (require 'doom-modeline-segments)
-    ;; https://martinralbrecht.wordpress.com/2020/08/23/conda-jupyter-and-emacs/
-    (doom-modeline-def-segment
-      conda-env
-      "The current conda environment.  Works with `conda'."
-      (when (bound-and-true-p conda-env-current-name)
-        (propertize (format " |%s|" conda-env-current-name) 'face (if (doom-modeline--active)
-                                                                      'mode-line
-                                                                    'mode-line-inactive) 'help-echo
-                                                                    (format "Conda environment: %s"
-                                                                            conda-env-current-name)))))
-  (doom-modeline-def-modeline
-    'main
-    '(bar workspace-name window-number modals matches buffer-info remote-host buffer-position
-          word-count parrot selection-info conda-env)
-    '(objed-state misc-info persp-name battery grip irc mu4e gnus github debug lsp minor-modes
-                  input-method indent-info buffer-encoding major-mode process vcs checker)))
+  (setq doom-modeline-major-mode-icon t)
+  (setq doom-modeline-buffer-state-icon nil)
+  (setq doom-modeline-minor-modes nil)
+  (setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode))
+  (setq doom-modeline-time t)
+  (setq doom-modeline-env-version t)
+  ;; (progn
+  ;;   (require 'doom-modeline-segments)
+  ;;   ;; https://martinralbrecht.wordpress.com/2020/08/23/conda-jupyter-and-emacs/
+  ;;   (doom-modeline-def-segment
+  ;;     conda-env
+  ;;     "The current conda environment.  Works with `conda'."
+  ;;     (when (bound-and-true-p conda-env-current-name)
+  ;;       (propertize (format " |%s|" conda-env-current-name) 'face (if (doom-modeline--active)
+  ;;                                                                     'mode-line
+  ;;                                                                   'mode-line-inactive) 'help-echo
+  ;;                                                                   (format "Conda environment: %s"
+  ;;                                                                           conda-env-current-name)))))
+  ;; (doom-modeline-def-modeline
+  ;;   'main
+  ;;   '(bar workspace-name window-number modals matches buffer-info remote-host buffer-position
+  ;;         word-count parrot selection-info conda-env)
+  ;;   '(objed-state misc-info persp-name battery grip irc mu4e gnus github debug lsp minor-modes
+  ;;                 input-method indent-info buffer-encoding major-mode process vcs checker))
+
+  (doom-modeline-mode 1))
 
 (use-package perspective
   :demand t
@@ -1560,70 +1567,6 @@
 
   (mu4e-alert-enable-notifications))
 
-(use-package all-the-icons)
-
-(use-package webkit
-  :straight (:type git
-                   :host github
-                   :repo "akirakyle/emacs-webkit"
-                   :files (:defaults "*.js" "*.css" "*.so")
-                   :pre-build ("make"))
-  ;; :bind ("s-b" 'webkit)
-  :init
-  (setq webkit-own-window nil)
-
-  :config
-  ;; If you don't care so much about privacy and want to give your data to google
-  (setq webkit-search-prefix "https://google.com/search?q=")
-
-  ;; Specify a different set of characters use in the link hints
-  ;; For example the following are more convienent if you use dvorak
-  (setq webkit-ace-chars "aoeuidhtns")
-
-  ;; If you want history saved in a different place or
-  ;; Set to `nil' to if you don't want history saved to file (will stay in memory)
-  (setq webkit-history-file "~/.emacs.d/webkit/history")
-
-  ;; If you want cookies saved in a different place or
-  ;; Set to `nil' to if you don't want cookies saved
-  (setq webkit-cookie-file "~/.emacs.d/webkit/cookies")
-
-  ;; See the above explination in the Background section
-  ;; This must be set before webkit.el is loaded so certain hooks aren't installed
-  (setq webkit-own-window nil)
-
-  ;; Set webkit as the default browse-url browser
-  (setq browse-url-browser-function 'webkit-browse-url)
-
-  ;; Force webkit to always open a new session instead of reusing a current one
-  (setq webkit-browse-url-force-new nil)
-
-  ;; Globally disable javascript
-  (add-hook 'webkit-new-hook #'webkit-enable-javascript)
-
-  ;; Override the "loading:" mode line indicator with an icon from `all-the-icons.el'
-  ;; You could also use a unicode icon like ↺
-  (defun webkit--display-progress (progress)
-    (setq webkit--progress-formatted
-          (if (equal progress 100.0)
-              ""
-            (format "%s%.0f%%  " (all-the-icons-faicon "spinner") progress)))
-    (force-mode-line-update))
-
-  ;; Set action to be taken on a download request. Predefined actions are
-  ;; `webkit-download-default', `webkit-download-save', and `webkit-download-open'
-  ;; where the save function saves to the download directory, the open function
-  ;; opens in a temp buffer and the default function interactively prompts.
-  (setq webkit-download-action-alist '(("\\.pdf\\'" . webkit-download-open)
-                                       ("\\.png\\'" . webkit-download-save)
-                                       (".*" . webkit-download-default)))
-
-  ;; Globally use a proxy
-  ;; (add-hook 'webkit-new-hook (lambda () (webkit-set-proxy "socks://localhost:8000")))
-
-  ;; Globally use the simple dark mode
-  (setq webkit-dark-mode t))
-
 (defun read-file (file-path)
   (with-temp-buffer
     (insert-file-contents file-path)
@@ -1757,9 +1700,6 @@
 (with-eval-after-load 'esh-opt
   (setq eshell-destroy-buffer-when-process-dies t)
   (setq eshell-visual-commands '("htop" "zsh" "vim")))
-
-(use-package eterm-256color
-  :hook (term-mode . eterm-256color-mode))
 
 (use-package fish-completion
   :disabled

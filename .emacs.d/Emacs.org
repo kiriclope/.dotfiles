@@ -723,8 +723,8 @@ The [[https://github.com/myrjola/diminish.el][diminish]] package hides pesky min
 
   (use-package
     doom-modeline
-    ;; :if (not (display-graphic-p))
     :init
+    (setq doom-modeline-support-imenu t)
     (setq doom-modeline-env-enable-python t)
     (setq doom-modeline-env-enable-go nil)
     (setq doom-modeline-buffer-encoding 'nondefault)
@@ -732,28 +732,35 @@ The [[https://github.com/myrjola/diminish.el][diminish]] package hides pesky min
     (setq doom-modeline-persp-icon nil)
     (setq doom-modeline-persp-name nil)
     :config
-    (setq doom-modeline-minor-modes nil)
-    (setq doom-modeline-buffer-state-icon nil)
+    (setq doom-modeline-project-detection 'auto)
+    (setq doom-modeline-buffer-file-name-style 'auto)
     (setq doom-modeline-icon nil)
-    (doom-modeline-mode 1)
-    (progn
-      (require 'doom-modeline-segments)
-      ;; https://martinralbrecht.wordpress.com/2020/08/23/conda-jupyter-and-emacs/
-      (doom-modeline-def-segment
-        conda-env
-        "The current conda environment.  Works with `conda'."
-        (when (bound-and-true-p conda-env-current-name)
-          (propertize (format " |%s|" conda-env-current-name) 'face (if (doom-modeline--active)
-                                                                        'mode-line
-                                                                      'mode-line-inactive) 'help-echo
-                                                                      (format "Conda environment: %s"
-                                                                              conda-env-current-name)))))
-    (doom-modeline-def-modeline
-      'main
-      '(bar workspace-name window-number modals matches buffer-info remote-host buffer-position
-            word-count parrot selection-info conda-env)
-      '(objed-state misc-info persp-name battery grip irc mu4e gnus github debug lsp minor-modes
-                    input-method indent-info buffer-encoding major-mode process vcs checker)))
+    (setq doom-modeline-major-mode-icon t)
+    (setq doom-modeline-buffer-state-icon nil)
+    (setq doom-modeline-minor-modes nil)
+    (setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode))
+    (setq doom-modeline-time t)
+    (setq doom-modeline-env-version t)
+    ;; (progn
+    ;;   (require 'doom-modeline-segments)
+    ;;   ;; https://martinralbrecht.wordpress.com/2020/08/23/conda-jupyter-and-emacs/
+    ;;   (doom-modeline-def-segment
+    ;;     conda-env
+    ;;     "The current conda environment.  Works with `conda'."
+    ;;     (when (bound-and-true-p conda-env-current-name)
+    ;;       (propertize (format " |%s|" conda-env-current-name) 'face (if (doom-modeline--active)
+    ;;                                                                     'mode-line
+    ;;                                                                   'mode-line-inactive) 'help-echo
+    ;;                                                                   (format "Conda environment: %s"
+    ;;                                                                           conda-env-current-name)))))
+    ;; (doom-modeline-def-modeline
+    ;;   'main
+    ;;   '(bar workspace-name window-number modals matches buffer-info remote-host buffer-position
+    ;;         word-count parrot selection-info conda-env)
+    ;;   '(objed-state misc-info persp-name battery grip irc mu4e gnus github debug lsp minor-modes
+    ;;                 input-method indent-info buffer-encoding major-mode process vcs checker))
+
+    (doom-modeline-mode 1))
 
 #+end_src
 
@@ -2995,7 +3002,7 @@ Now you can use M-x org-mime-htmlize inside of a mail composition buffer to conv
 : t
 
 ** Web
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 
   (use-package all-the-icons)
 
@@ -3227,12 +3234,18 @@ Custom eshell commands will go here.
 #+begin_src emacs-lisp
 
   (use-package eterm-256color
+    :ensure t
     :hook (term-mode . eterm-256color-mode))
 
 #+end_src
 
 #+RESULTS:
 | eterm-256color-mode | evil-collection-term-escape-stay | evil-collection-term-sync-state-and-mode |
+
+If emacs keep asking for compilation every time ones open a terminal do:
+#+begin_src bash
+tic -x -o ~/.terminfo ~/.emacs.d/straight/build/eterm-256color.ti
+#+end_src
 
 *** Fish Completion
 
