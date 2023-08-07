@@ -859,80 +859,111 @@
   (add-to-list 'org-structure-template-alist '("json" . "src json")))
 
 ;; Org mode
-(setq-default fill-column 80)
+  (setq-default fill-column 80)
 
-;; Turn on indentation and auto-fill mode for Org files
-(defun dw/org-mode-setup ()
-  (org-indent-mode)
-  (variable-pitch-mode 1)
-  (auto-fill-mode 0)
-  (visual-line-mode 1)
-  (setq evil-auto-indent nil)
-  (setq org-support-shift-select t)
-  (diminish org-indent-mode))
+  ;; Turn on indentation and auto-fill mode for Org files
+  (defun dw/org-mode-setup ()
+    (org-indent-mode)
+    (variable-pitch-mode 1)
+    (auto-fill-mode 0)
+    (visual-line-mode 1)
+    (setq evil-auto-indent nil)
+    (setq org-support-shift-select t)
+    (diminish org-indent-mode))
 
 ;; Make sure Straight pulls Org from Guix
 (straight-use-package '(org :type built-in))
 
+;; getting notebook like experience with scimax
+(add-to-list 'load-path "/home/leon/.emacs.d/lisp/scimax")
+
+(use-package jupyter)
+
+;; this is my compiled version of zmq
+;; to compile try make configure
+;; if configure: error: cannot find required auxiliary files: config.guess config.sub ar-lib compile missing install-sh
+;; then to src and run autoreconf -ivf
+;; go back to zmq and run make configure and then make
+(add-to-list 'load-path "/home/leon/.emacs.d/lisp/zmq")
+(use-package zmq)
+
 (use-package org
-  ;; :straight (org-plus-contrib
-  ;;            :type git
-  ;;            :host github
-  ;;            :repo "emacs-straight/org-mode"
-  ;;            :local-repo "org")
-  ;; :straight (org-plus-contrib :repo "https://code.orgmode.org/bzg/org-mode.git" :local-repo "org" :files ("*.el" "lisp/*.el" "contrib/lisp/*.el"))
-  :ensure t
-  :defer t
-  :hook ((org-mode . dw/org-mode-setup)
-         (org-mode . my/org-fonts)
-         (org-mode . my/org-block-templates))
-  :config
-  (setq org-ellipsis " ▾"
-        org-hide-emphasis-markers t
-        org-src-fontify-natively t
-        org-fontify-quote-and-verse-blocks t
-        org-src-tab-acts-natively t
-        org-edit-src-content-indentation 2
-        org-hide-block-startup t
-        org-src-preserve-indentation nil
-        org-startup-folded nil
-        org-cycle-separator-lines 2
-        org-capture-bookmark nil)
+        ;; :straight (org-plus-contrib
+        ;;            :type git
+        ;;            :host github
+        ;;            :repo "emacs-straight/org-mode"
+        ;;            :local-repo "org")
+        ;; :straight (org-plus-contrib :repo "https://code.orgmode.org/bzg/org-mode.git" :local-repo "org" :files ("*.el" "lisp/*.el" "contrib/lisp/*.el"))
+        :ensure t
+        :defer t
+        :hook ((org-mode . dw/org-mode-setup)
+               (org-mode . my/org-fonts)
+               (org-mode . my/org-block-templates))
+        :config
+        (setq org-ellipsis " ▾"
+              org-hide-emphasis-markers t
+              org-src-fontify-natively t
+              org-fontify-quote-and-verse-blocks t
+              org-src-tab-acts-natively t
+              org-edit-src-content-indentation 2
+              org-hide-block-startup t
+              org-src-preserve-indentation nil
+              org-startup-folded nil
+              org-cycle-separator-lines 2
+              org-capture-bookmark nil)
 
-  (setq org-modules
-        '(org-crypt
-          org-habit
-          ))
+        (setq org-modules
+              '(org-crypt
+                org-habit
+                ))
 
-  (setq org-refile-targets '((nil :maxlevel . 1)
-                             (org-agenda-files :maxlevel . 1)))
+        (setq org-refile-targets '((nil :maxlevel . 1)
+                                   (org-agenda-files :maxlevel . 1)))
 
-  (setq org-outline-path-complete-in-steps nil)
-  (setq org-refile-use-outline-path t)
+        (setq org-outline-path-complete-in-steps nil)
+        (setq org-refile-use-outline-path t)
 
-  (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
-  (evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
+        (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
+        (evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
 
-  (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
-  (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
+        (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
+        (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
 
-  (setq org-startup-with-inline-images t) ;; Display inline images on startup
-  (setq org-confirm-babel-evaluate nil) ;; Don't prompt for confirmation when evaluating code blocks
-  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append) ;; Display inline images
+        (setq org-confirm-babel-evaluate nil) ;; Don't prompt for confirmation when evaluating code block
 
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (python . t)
-     (shell . t)
-     (ipython . t)
-     (C . t)
-     ))
+        ;; Images
+        ;; default with images open
+        (setq org-startup-with-inline-images "inlineimages")
+        ;; (setq org-startup-with-inline-images t) ;; Display inline images on startup
 
-  (push '("conf-unix" . conf-unix) org-src-lang-modes)
+        ;; default width
+        (setq org-image-actual-width nil)
 
-  (require 'ox-latex)
-  (require 'ox-md))
+        ;; redisplay figures when you run a block so they are always current.
+        (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+        ;; (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append) ;; Display inline images
+
+        (org-babel-do-load-languages
+         'org-babel-load-languages
+         '((emacs-lisp . t)
+           (python . t)
+           (shell . t)
+           (ipython . t)
+           (jupyter . t)
+           (C . t)
+           ))
+
+        (push '("conf-unix" . conf-unix) org-src-lang-modes)
+
+        (require 'ox-latex)
+        (require 'ox-md)
+
+        ;; notebook like experience with scimax
+        (require 'zmq)
+        (require 'jupyter)
+        (require 'scimax-org-images)
+        (require 'scimax-org-src-blocks)
+        (require 'scimax-jupyter))
 
 (use-package  ob-ipython
   :after org
@@ -1118,8 +1149,8 @@
 (use-package git-gutter
   ;; :straight git-gutter-fringe
   :diminish
-  :hook ((text-mode . git-gutter-mode)
-         (prog-mode . git-gutter-mode))
+  ;; :hook ((text-mode . git-gutter-mode)
+  ;;        (prog-mode . git-gutter-mode))
   :config
   (setq git-gutter:update-interval 2)
   (require 'git-gutter-fringe)
@@ -1221,15 +1252,47 @@
 (add-to-list 'auto-mode-alist '("\\.cpp\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
+;; need elpy for doc and imports sorting
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable))
+
 (use-package eglot
-  :straight t
-  :hook
-  (c-mode . eglot-ensure)
-  (c++-mode . eglot-ensure)
-  (python-mode . eglot-ensure)
-  :config
-  (add-to-list 'eglot-server-programs '(c++-mode . ("ccls" "--init={\"clang\":{\"includePath\":[\"/usr/include/c++/11\"]}}")))
-  (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio" "--enable-folding" "--completion" "snippets")))
+    :ensure t
+    :defer t
+    :bind (:map eglot-mode-map
+                ("C-c C-d" . eldoc)
+                ("C-c C-e" . eglot-rename)
+                ("C-c C-o" . python-sort-imports)
+                ("C-c C-f" . eglot-format-buffer))
+    :hook ((python-mode . eglot-ensure)
+           (python-mode . flyspell-prog-mode)
+           (python-mode . superword-mode)
+           (python-mode . hs-minor-mode)
+           (python-mode . (lambda () (set-fill-column 88))))
+    :config
+    (add-to-list 'eglot-server-programs '(c++-mode . ("ccls" "--init={\"clang\":{\"includePath\":[\"/usr/include/c++/11\"]}}")))
+
+    (setq-default eglot-workspace-configuration
+                  '((:pylsp . (:configurationSources ["flake8"]
+                                                     :plugins (
+                                                               :pycodestyle (:enabled :json-false)
+                                                                            :mccabe (:enabled :json-false)
+                                                                            :pyflakes (:enabled :json-false)
+                                                                            :flake8 (:enabled :json-false
+                                                                                              :maxLineLength 88)
+                                                                            :ruff (:enabled t
+                                                                                            :lineLength 88)
+                                                                            :pydocstyle (:enabled t
+                                                                                                  :convention "numpy")
+                                                                            :yapf (:enabled :json-false)
+                                                                            :autopep8 (:enabled :json-false)
+                                                                            :py-isort (:enabled)
+                                                                            :black (:enabled t
+                                                                                             :line_length 88
+                                                                                             :cache_config t))))))
+
   ;; Use corfu for completions using Eglot
   (add-hook 'eglot-completion-at-point-functions #'corfu-eglot-complete nil t))
 
@@ -1291,52 +1354,6 @@
     (dap-python-debugger 'debugpy)
     :config
     (require 'dap-python))
-
-;; (use-package py-isort
-;;   :hook (python-mode . py-isort-before-save)
-;;   :config
-;;   (setq py-isort-options '("--lines=88" "-m=3" "-tc" "-fgw=0" "-ca"))) ;
-
-(defun call-isort ()
-  "Call the isort command on the current buffer"
-  (interactive)
-  (shell-command-on-region (point-min)
-                           (point-max)
-                           "isort -"
-                           (current-buffer)
-                           t))
-
-(add-hook 'python-mode-hook
-          (lambda ()
-            (add-hook 'before-save-hook 'call-isort nil t)))
-
-  ;; (use-package py-autoflake
-  ;;       :hook (python-mode . py-autoflake-enable-on-save)
-  ;;       :config
-  ;;       (setq py-autoflake-options '("--expand-star-imports")))
-
-  ;; (use-package py-docformatter
-  ;;       :hook (python-mode . py-docformatter-enable-on-save)
-  ;;       :config
-  ;;       (setq py-docformatter-options '("--wrap-summaries=88" "--pre-summary-newline")))
-
-  (use-package python-docstring
-    :hook (python-mode . python-docstring-mode))
-
-  (use-package blacken
-    :hook (python-mode . blacken-mode)
-      :config (setq blacken-line-length '88))
-
-  (use-package python-black
-    :straight t
-    :hook (python-mode . python-black-on-save-mode-enable-dwim))
-
-  (defun leon/eglot-format-buffer ()
-    "Format current buffer according to LSP server."
-    (interactive)
-    (if (and (eq major-mode 'python-mode) (executable-find "black"))
-        (python-black-buffer)
-      (eglot--format-buffer)))
 
 (use-package
   conda
@@ -1791,11 +1808,11 @@
 (setq gc-cons-threshold (* 2 1000 1000))
 
 (defun efs/org-babel-tangle-config ()
-  "Automatically tangle our Emacs.org config file when we save it."
-  (when (string-equal (buffer-file-name)
-                      (expand-file-name "~/.emacs.d/Emacs_cluster.org"))
+    "Automatically tangle our Emacs.org config file when we save it."
+    (when (string-equal (buffer-file-name)
+                        (expand-file-name "~/.emacs.d/Emacs.org"))
 
-    (let ((org-confirm-babel-evaluate nil))
-      (org-babel-tangle))))
+      (let ((org-confirm-babel-evaluate nil))
+        (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))

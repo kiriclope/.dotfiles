@@ -136,7 +136,7 @@ fi
 # <<< conda initialize <<<
 
 export CONDA_PATH="/home/leon/mambaforge/bin:/home/leon/mambaforge/condabin:"
-export LD_LIBRARY_PATH=$HOME/mambaforge/lib:$LD_LIBRARY_PATH
+# export LD_LIBRARY_PATH=$HOME/mambaforge/lib:$LD_LIBRARY_PATH
 
 # We're in Emacs, yo
 export VISUAL=emacsclient
@@ -165,17 +165,37 @@ if [ "$HOSTNAME" = "minibaps" ]; then
 
     # .local
     export PATH="$HOME/.local/bin:$PATH"
-    export PATH="$HOME/.local/libexec/:$PATH"
+    # export PATH="$HOME/.local/libexec/:$PATH"
 
-    export LD_LIBRARY_PATH="$HOME/.local/usr/lib:$LD_LIBRARY_PATH"
-    export LD_LIBRARY_PATH="$HOME/.local/usr/lib64:$LD_LIBRARY_PATH"
+    # export LD_LIBRARY_PATH="$HOME/.local/usr/lib:$LD_LIBRARY_PATH"
+    # export LD_LIBRARY_PATH="$HOME/.local/usr/lib64:$LD_LIBRARY_PATH"
 
-    export MANPATH="$HOME/.local/share/man:$MANPATH"
-    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:$HOME/.local/include/"
-    export PKG_CONFIG_PATH="$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH"
+    # export ZMQ_LIBS="-L$HOME/.local/lib -lzmq"
+    # export ZMQ_CFLAGS="-I$HOME/.local/include"
 
-    export PERL5LIB="$HOME/.local/lib/perl5:$PERL5LIB"
-    export PERL_LOCAL_LIB_ROOT="$HOME/.local/:$PERL_LOCAL_LIB_ROOT:"
-    export PERL_MB_OPT="--install_base \"$HOME/leon/.local/\":$PERL_MB_OPT$"
-    export PERL_MM_OPT="INSTALL_BASE=$HOME/.local/:$PERL_MM_OPT"
+    # export EZMQ_LIBS="-L$HOME/.local/lib -lzmq"
+    # export EZMQ_CFLAGS="-I$HOME/.local/include"
+
+    # export MANPATH="$HOME/.local/share/man:$MANPATH"
+    # export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:$HOME/.local/include/"
+    # export PKG_CONFIG_PATH="$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+    # export PERL5LIB="$HOME/.local/lib/perl5:$PERL5LIB"
+    # export PERL_LOCAL_LIB_ROOT="$HOME/.local/:$PERL_LOCAL_LIB_ROOT:"
+    # export PERL_MB_OPT="--install_base \"$HOME/leon/.local/\":$PERL_MB_OPT$"
+    # export PERL_MM_OPT="INSTALL_BASE=$HOME/.local/:$PERL_MM_OPT"
+
+    # brew
+    export HOMEBREW_CURL_PATH="$HOME/mambaforge/bin/curl"
+    export HOMEBREW_MAKE_JOBS=50
+
+    export PATH=/home/leon/homebrew/bin:$PATH
+    # export LD_LIBRARY_PATH=$HOME/homebrew/lib:$LD_LIBRARY_PATH
+    export MANPATH="$HOME/homebrew/share/man/:$MANPATH"
+
+    # export XML_CATALOG_FILES=/home/leon/homebrew/etc/xml/catalog
+
+    # export ZMQ_CFLAGS="-I$HOME/homebrew/include"
+    # export ZMQ_LIBS="-L$HOME/homebrew/lib -lzmq"
+
 fi
