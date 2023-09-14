@@ -898,7 +898,7 @@ Default to an indentation size of 2 spaces since it's the norm for pretty much e
 
 ** Automatically clean whitespace
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package ws-butler
     :hook ((text-mode . ws-butler-mode)
            (prog-mode . ws-butler-mode)
@@ -1580,7 +1580,8 @@ Emacs' default buffer placement algorithm is pretty disruptive if you like setti
     (add-to-list 'org-structure-template-alist '("sc" . "src scheme"))
     (add-to-list 'org-structure-template-alist '("ts" . "src typescript"))
     (add-to-list 'org-structure-template-alist '("py" . "src python"))
-    (add-to-list 'org-structure-template-alist '("ipy" . "src ipython :results drawer :async t :session mysession"))
+    (add-to-list 'org-structure-template-alist '("ipy" . "src ipython"))
+    (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
     (add-to-list 'org-structure-template-alist '("go" . "src go"))
     (add-to-list 'org-structure-template-alist '("yaml" . "src yaml"))
     (add-to-list 'org-structure-template-alist '("json" . "src json")))
@@ -1637,6 +1638,19 @@ Set up Org Mode with a baseline configuration.  The following sections will add 
                  (org-mode . my/org-fonts)
                  (org-mode . my/org-block-templates))
           :config
+          ;; latex and md convertion
+          (require 'ox-latex)
+          (require 'ox-md)
+          (require 'ox-ipynb)
+          ;; emacs-jupyter
+          (require 'zmq)
+          (require 'jupyter)
+          ;; improved notebook like experience with scimax
+          (require 'scimax-org-images)
+          (require 'scimax-org-src-blocks)
+          (require 'scimax-jupyter)
+
+          ;; my global config
           (setq org-ellipsis " ▾"
                 org-hide-emphasis-markers t
                 org-src-fontify-natively t
@@ -1663,52 +1677,41 @@ Set up Org Mode with a baseline configuration.  The following sections will add 
           (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
           (evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
 
-          (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
-          (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
+          ;; (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
+          ;; (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
 
           (setq org-confirm-babel-evaluate nil) ;; Don't prompt for confirmation when evaluating code block
 
           ;; Images
           ;; default with images open
-          (setq org-startup-with-inline-images "inlineimages")
-          ;; (setq org-startup-with-inline-images t) ;; Display inline images on startup
+          ;; (setq org-startup-with-inline-images "inlineimages")
+          (setq org-startup-with-inline-images t) ;; Display inline images on startup
 
           ;; default width
           (setq org-image-actual-width nil)
 
           ;; redisplay figures when you run a block so they are always current.
-          (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
-          ;; (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append) ;; Display inline images
+          ;; (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+          (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append) ;; Display inline images
 
           (org-babel-do-load-languages
            'org-babel-load-languages
            '((emacs-lisp . t)
              (python . t)
              (shell . t)
-             (ipython . t)
              (jupyter . t)
              (C . t)
              ))
 
-          (push '("conf-unix" . conf-unix) org-src-lang-modes)
-
-          (require 'ox-latex)
-          (require 'ox-md)
-
-          ;; notebook like experience with scimax
-          (require 'zmq)
-          (require 'jupyter)
-          (require 'scimax-org-images)
-          (require 'scimax-org-src-blocks)
-          (require 'scimax-jupyter))
+          (push '("conf-unix" . conf-unix) org-src-lang-modes))
 
   #+end_src
 
   #+RESULTS:
-  | org-tempo-setup | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | (closure (bootstrap-version t) nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | rainbow-mode | org-appear-mode | evil-org-mode | org-superstar-mode | scimax-fix-<>-syntax | org-babel-jupyter-make-local-aliases | jupyter-org-interaction-mode | ob-ipython-auto-configure-kernels | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-make-toc-mode | my/org-block-templates | my/org-fonts | dw/org-mode-setup | dw/org-mode-visual-fill | (closure ((mode . org-mode-hook) (--dolist-tail--) bootstrap-version t) nil (display-line-numbers-mode 0)) | scimax-ob-src-key-bindings |
+  | org-tempo-setup | (closure (bootstrap-version t) nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | rainbow-mode | org-appear-mode | evil-org-mode | org-superstar-mode | scimax-fix-<>-syntax | org-babel-jupyter-make-local-aliases | jupyter-org-interaction-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | my/org-block-templates | my/org-fonts | dw/org-mode-setup | dw/org-mode-visual-fill | (closure ((mode . org-mode-hook) (--dolist-tail--) bootstrap-version t) nil (display-line-numbers-mode 0)) | scimax-ob-src-key-bindings |
 
 ** ob-ipython
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package  ob-ipython
     :after org
     :config
@@ -1741,14 +1744,10 @@ Set up Org Mode with a baseline configuration.  The following sections will add 
                :type git
                :host github
                :repo "jkitchin/ox-ipynb")
-    :after org
-    :config
-    (require 'ox-ipynb))
-
+    :after org)
 #+end_src
 
 #+RESULTS:
-: t
 
 ** scimax
 #+begin_src emacs-lisp :tangle no
@@ -1824,7 +1823,7 @@ Set up Org Mode with a baseline configuration.  The following sections will add 
 
 ** Update Table of Contents on Save
 It's nice to have a table of contents section for long literate configuration files (like this one!) so I use =org-make-toc= to automatically update the ToC in any header with a property named =TOC=.
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 
   (use-package org-make-toc
     :hook (org-mode . org-make-toc-mode))
@@ -2371,10 +2370,10 @@ files contained within the repo.  More information at the [[https://github.com/a
   (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
   ;; need elpy for doc and imports sorting
-  (use-package elpy
-    :ensure t
-    :init
-    (elpy-enable))
+  ;; (use-package elpy
+  ;;   :ensure t
+  ;;   :init
+  ;;   (elpy-enable))
 
   (use-package eglot
       :ensure t
@@ -2436,7 +2435,7 @@ files contained within the repo.  More information at the [[https://github.com/a
 : t
 *** TypeScript and JavaScript
 Configure TypeScript and JavaScript language modes
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 
   (use-package typescript-mode
     :mode "\\.ts\\'"
@@ -2692,7 +2691,7 @@ Configure TypeScript and JavaScript language modes
 ** Compilation
 Set up the =compile= package and ensure that compilation output automatically scrolls.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package compile
     :custom
     (compilation-scroll-output t))
@@ -3517,4 +3516,4 @@ Dial the GC threshold back down so that garbage collection happens more frequent
 #+end_src
 
 #+RESULTS:
-| (lambda nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | (lambda nil (add-hook 'after-save-hook 'efs/org-babel-tangle-config)) | org-tempo-setup | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | (closure (bootstrap-version t) nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | rainbow-mode | org-appear-mode | evil-org-mode | org-superstar-mode | ob-ipython-auto-configure-kernels | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | org-make-toc-mode | my/org-block-templates | my/org-fonts | dw/org-mode-setup | dw/org-mode-visual-fill | (closure ((mode . org-mode-hook) (--dolist-tail--) bootstrap-version t) nil (display-line-numbers-mode 0)) |
+| (lambda nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config)) | (lambda nil (add-hook 'after-save-hook 'efs/org-babel-tangle-config)) | org-tempo-setup | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | (closure (bootstrap-version t) nil (add-hook 'after-save-hook 'efs/org-babel-tangle-config)) | rainbow-mode | org-appear-mode | evil-org-mode | org-superstar-mode | scimax-fix-<>-syntax | org-babel-jupyter-make-local-aliases | jupyter-org-interaction-mode | ob-ipython-auto-configure-kernels | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | my/org-block-templates | my/org-fonts | dw/org-mode-setup | dw/org-mode-visual-fill | (closure ((mode . org-mode-hook) (--dolist-tail--) bootstrap-version t) nil (display-line-numbers-mode 0)) | scimax-ob-src-key-bindings |

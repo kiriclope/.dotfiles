@@ -405,11 +405,6 @@
 
 (setq-default indent-tabs-mode nil)
 
-(use-package ws-butler
-  :hook ((text-mode . ws-butler-mode)
-         (prog-mode . ws-butler-mode)
-         (python-mode . ws-butler-mode)))
-
 (use-package parinfer
   :disabled
   :hook ((clojure-mode . parinfer-mode)
@@ -853,7 +848,8 @@
   (add-to-list 'org-structure-template-alist '("sc" . "src scheme"))
   (add-to-list 'org-structure-template-alist '("ts" . "src typescript"))
   (add-to-list 'org-structure-template-alist '("py" . "src python"))
-  (add-to-list 'org-structure-template-alist '("ipy" . "src ipython :results drawer :async t :session mysession"))
+  (add-to-list 'org-structure-template-alist '("ipy" . "src ipython"))
+  (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
   (add-to-list 'org-structure-template-alist '("go" . "src go"))
   (add-to-list 'org-structure-template-alist '("yaml" . "src yaml"))
   (add-to-list 'org-structure-template-alist '("json" . "src json")))
@@ -900,6 +896,19 @@
                (org-mode . my/org-fonts)
                (org-mode . my/org-block-templates))
         :config
+        ;; latex and md convertion
+        (require 'ox-latex)
+        (require 'ox-md)
+        (require 'ox-ipynb)
+        ;; emacs-jupyter
+        (require 'zmq)
+        (require 'jupyter)
+        ;; improved notebook like experience with scimax
+        (require 'scimax-org-images)
+        (require 'scimax-org-src-blocks)
+        (require 'scimax-jupyter)
+
+        ;; my global config
         (setq org-ellipsis " ▾"
               org-hide-emphasis-markers t
               org-src-fontify-natively t
@@ -926,73 +935,40 @@
         (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
         (evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
 
-        (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
-        (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
+        ;; (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
+        ;; (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
 
         (setq org-confirm-babel-evaluate nil) ;; Don't prompt for confirmation when evaluating code block
 
         ;; Images
         ;; default with images open
-        (setq org-startup-with-inline-images "inlineimages")
-        ;; (setq org-startup-with-inline-images t) ;; Display inline images on startup
+        ;; (setq org-startup-with-inline-images "inlineimages")
+        (setq org-startup-with-inline-images t) ;; Display inline images on startup
 
         ;; default width
         (setq org-image-actual-width nil)
 
         ;; redisplay figures when you run a block so they are always current.
-        (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
-        ;; (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append) ;; Display inline images
+        ;; (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+        (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append) ;; Display inline images
 
         (org-babel-do-load-languages
          'org-babel-load-languages
          '((emacs-lisp . t)
            (python . t)
            (shell . t)
-           (ipython . t)
            (jupyter . t)
            (C . t)
            ))
 
-        (push '("conf-unix" . conf-unix) org-src-lang-modes)
-
-        (require 'ox-latex)
-        (require 'ox-md)
-
-        ;; notebook like experience with scimax
-        (require 'zmq)
-        (require 'jupyter)
-        (require 'scimax-org-images)
-        (require 'scimax-org-src-blocks)
-        (require 'scimax-jupyter))
-
-(use-package  ob-ipython
-  :after org
-  :config
-  ;; set default ipython exex
-  (setq org-babel-python-command "/home/leon/mambaforge/bin/python3")
-
-  ;; fix bug with json and obipython
-  (advice-add 'ob-ipython--collect-json :before
-              (lambda (&rest args)
-                (let ((start (point)))
-                  (set-mark (point))
-                  (while (re-search-forward "{" nil t)
-                    (backward-char)
-                    (kill-region (region-beginning) (region-end))
-                    (re-search-forward "}\n" nil t)
-                    (set-mark (point)))
-                  (end-of-buffer)
-                  (kill-region (region-beginning) (region-end))
-                  (goto-char start)))))
+        (push '("conf-unix" . conf-unix) org-src-lang-modes))
 
 (use-package ox-ipynb
   :straight (ox-ipynb
              :type git
              :host github
              :repo "jkitchin/ox-ipynb")
-  :after org
-  :config
-  (require 'ox-ipynb))
+  :after org)
 
 ;; Use bullet characters instead of asterisks, plus set the header font sizes to something more palatable.  A fair amount of inspiration has been taken from [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][this blog post]].
 
@@ -1030,9 +1006,6 @@
 (defun dw/search-org-files ()
   (interactive)
   (counsel-rg "" "~/Notes" nil "Search Notes: "))
-
-(use-package org-make-toc
-  :hook (org-mode . org-make-toc-mode))
 
 (use-package org-caldav
   :after org
@@ -1253,10 +1226,10 @@
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
 ;; need elpy for doc and imports sorting
-(use-package elpy
-  :ensure t
-  :init
-  (elpy-enable))
+;; (use-package elpy
+;;   :ensure t
+;;   :init
+;;   (elpy-enable))
 
 (use-package eglot
     :ensure t
@@ -1305,40 +1278,6 @@
   (dap-tooltip-mode 1)
   (require 'dap-node)
   (dap-node-setup))
-
-(use-package typescript-mode
-  :mode "\\.ts\\'"
-  :config
-  (setq typescript-indent-level 2))
-
-(defun dw/set-js-indentation ()
-  (setq js-indent-level 2)
-  ;; (setq evil-shift-width js-indent-level)
-  (setq-default tab-width 2))
-
-(use-package js2-mode
-  :mode "\\.jsx?\\'"
-  :config
-  ;; Use js2-mode for Node scripts
-  (add-to-list 'magic-mode-alist '("#!/usr/bin/env node" . js2-mode))
-
-  ;; Don't use built-in syntax checking
-  (setq js2-mode-show-strict-warnings nil)
-
-  ;; Set up proper indentation in JavaScript and JSON files
-  (add-hook 'js2-mode-hook #'dw/set-js-indentation)
-  (add-hook 'json-mode-hook #'dw/set-js-indentation))
-
-
-(use-package apheleia
-  :config
-  (apheleia-global-mode +1))
-
-(use-package prettier-js
-  ;; :hook ((js2-mode . prettier-js-mode)
-  ;;        (typescript-mode . prettier-js-mode))
-  :config
-  (setq prettier-js-show-errors nil))
 
 (use-package cmake-mode
   :mode "CMakeLists\\.txt\\'"
@@ -1443,16 +1382,6 @@
 
 (use-package skewer-mode
   :after web-mode)
-
-(use-package compile
-  :custom
-  (compilation-scroll-output t))
-
-(defun auto-recompile-buffer ()
-  (interactive)
-  (if (member #'recompile after-save-hook)
-      (remove-hook 'after-save-hook #'recompile t)
-    (add-hook 'after-save-hook #'recompile nil t)))
 
 (use-package aggressive-indent
   :commands (aggressive-indent-mode))
