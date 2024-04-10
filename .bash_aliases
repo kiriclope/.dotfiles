@@ -24,6 +24,7 @@ alias tunneltoParis="tunnelto181"
 #####################
 # IDIBAPS 
 #####################
+alias notifyme='ssh leon@172.28.86.215 "notify-send \"Job Done\" \"Your job with id: \$1 has finished\""'
 
 alias ssh_minibaps="ssh -tXYC leon@84.88.67.74 -p 4022 'ssh -tXYC 172.26.20.44' "
 alias minibaps="ssh -tXYC 172.26.20.44"

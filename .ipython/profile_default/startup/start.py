@@ -1,6 +1,12 @@
 from IPython import get_ipython
 ipython = get_ipython()
 
+try:
+    from IPython.core import ultratb
+    ultratb.VerboseTB._tb_highlight = "bg:ansired"
+except Exception:
+    print("Error patching background color for tracebacks, they'll be the ugly default instead")
+    
 # If in ipython, load autoreload extension
 if 'ipython' in globals():
     print('\nWelcome to IPython!')

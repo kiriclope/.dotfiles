@@ -116,8 +116,28 @@ if ! shopt -oq posix; then
   fi
 fi
 
+
+# # >>> conda initialize >>>
+# # !! Contents within this block are managed by 'conda init' !!
+# __conda_setup="$('/home/leon/mambaforge/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+# if [ $? -eq 0 ]; then
+#     eval "$__conda_setup"
+# else
+#     if [ -f "/home/leon/mambaforge/etc/profile.d/conda.sh" ]; then
+#         . "/home/leon/mambaforge/etc/profile.d/conda.sh"
+#     else
+#         export PATH="/home/leon/mambaforge/bin:$PATH"
+#     fi
+# fi
+# unset __conda_setup
+
+# if [ -f "/home/leon/mambaforge/etc/profile.d/mamba.sh" ]; then
+#     . "/home/leon/mambaforge/etc/profile.d/mamba.sh"
+# fi
+# # <<< conda initialize <<<
+
 # export CONDA_PATH="/home/leon/mambaforge/bin:/home/leon/mambaforge/condabin:"
-# export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/mambaforge/lib"
+# export LD_LIBRARY_PATH=$HOME/mambaforge/lib:$LD_LIBRARY_PATH
 
 # We're in Emacs, yo
 export VISUAL=emacsclient
@@ -138,7 +158,7 @@ fi
 if [ "$HOSTNAME" = "minibaps" ] || [ "$HOSTNAME" = "minibaps2" ]; then
     export XDG_RUNTIME_DIR="/tmp/runtime-leon"
     # export INFOPATH=$INFOPATH:/usr/share/info:/usr/.local/share/info:/home/leon/mambaforge/share/info
-    export TMPDIR=~/tmp
+
     # pyenv
     export PYENV_ROOT="$HOME/.pyenv"
     command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
@@ -150,7 +170,7 @@ if [ "$HOSTNAME" = "minibaps" ] || [ "$HOSTNAME" = "minibaps2" ]; then
 
     # export LD_LIBRARY_PATH="$HOME/.local/usr/lib:$LD_LIBRARY_PATH"
     # export LD_LIBRARY_PATH="$HOME/.local/usr/lib64:$LD_LIBRARY_PATH"
-    
+
     # export ZMQ_LIBS="-L$HOME/.local/lib -lzmq"
     # export ZMQ_CFLAGS="-I$HOME/.local/include"
 
@@ -167,7 +187,7 @@ if [ "$HOSTNAME" = "minibaps" ] || [ "$HOSTNAME" = "minibaps2" ]; then
     # export PERL_MM_OPT="INSTALL_BASE=$HOME/.local/:$PERL_MM_OPT"
 
     # brew
-    export HOMEBREW_CURL_PATH="$HOME/mambaforge/bin/curl"
+    # export HOMEBREW_CURL_PATH="$HOME/mambaforge/bin/curl"
     export HOMEBREW_MAKE_JOBS=50
 
     export PATH=/home/leon/homebrew/bin:$PATH
@@ -180,25 +200,3 @@ if [ "$HOSTNAME" = "minibaps" ] || [ "$HOSTNAME" = "minibaps2" ]; then
     # export ZMQ_LIBS="-L$HOME/homebrew/lib -lzmq"
 
 fi
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/leon/mambaforge/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/leon/mambaforge/etc/profile.d/conda.sh" ]; then
-        . "/home/leon/mambaforge/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/leon/mambaforge/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-
-if [ -f "/home/leon/mambaforge/etc/profile.d/mamba.sh" ]; then
-    . "/home/leon/mambaforge/etc/profile.d/mamba.sh"
-fi
-# <<< conda initialize <<<
-
-export CONDA_PATH="/home/leon/mambaforge/bin:/home/leon/mambaforge/condabin:"
-

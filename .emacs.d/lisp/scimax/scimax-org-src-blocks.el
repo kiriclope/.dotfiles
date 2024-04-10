@@ -1,12 +1,10 @@
-;;; scimax-org-src-blocks.el --- Scimax customizations for src blocks.
+;;; scimax-org-src-blocks.el --- Scimax customizations for src block -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;;
 ;; This library fixes the fontification of <> in src-blocks so that you can use
 ;; them as operators.
 ;;
-;;
-
 ;; * Babel settings
 ;; enable prompt-free code running
 (setq org-confirm-babel-evaluate nil
