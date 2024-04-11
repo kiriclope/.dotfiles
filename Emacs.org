@@ -1,6 +1,36 @@
-#+TITLE: Emacs Configuration
+#+TITLE: Emacs Modular Configuration
 #+STARTUP: fold
-#+PROPERTY: header-args:emacs-lisp
+
+* Early init
+
+#+begin_src emacs-lisp :tangle .config/emacs/early-init.el
+  ;;; early-init.el --- Early Initialization.  -*- lexical-binding: t -*-
+
+  ;; Defer garbage collection further back in the startup process
+  (setq gc-cons-threshold most-positive-fixnum
+        gc-cons-percentage 0.6)
+
+  ;; Do not initialize the package manager. This is done by straight.el
+  (setq package-enable-at-startup nil)
+  (advice-add #'package--ensure-init-file :override #'ignore)
+
+  ;; Better performance: lean towards slightly longer idle times for better throughput
+  (setq idle-update-delay 1.0)
+
+  ;; Disable bidirectional text support for better performance
+  (setq-default bidi-display-reordering 'nil)
+
+  ;; Disable GUI elements early on
+  (push '(menu-bar-lines . 0) default-frame-alist)
+  (push '(tool-bar-lines . 0) default-frame-alist)
+  (push '(vertical-scroll-bars) default-frame-alist)
+
+  ;; Optional but helpful: reduce the frequency of file backups
+  (setq make-backup-files nil)
+
+  (provide 'early-init)
+  ;;; early-init.el ends here
+#+end_src
 
 * init.el
 :PROPERTIES:
@@ -9,7 +39,7 @@
 ** Startup performance
 
 #+begin_src emacs-lisp
-  ;;  -*-lexical-binding: t-*-
+  ;;; early-init.el --- Early Initialization.  -*- lexical-binding: t; -*-
   (setq debug-on-error 1)
 
   ;; Add configuration modules to load path
@@ -41,22 +71,25 @@
   (require 'lc-evil)
   (require 'lc-org)
   (require 'lc-dev)
+  (require 'lc-shell)
   (require 'lc-ai)
 #+end_src
 
 ** reinit perf
 #+begin_src emacs-lisp
   (setq gc-cons-threshold (* 2 1000 1000))
+
+  (provide 'init)
+  ;;; init.el ends here
 #+end_src
+
 * Package Management
 :PROPERTIES:
 :header-args: emacs-lisp :tangle .config/emacs/modules/lc-package.el :mkdirp yes
 :END:
 
 #+begin_src emacs-lisp
-  ;;  -*-lexical-binding: t-*-
-
-  ;;; Package Management
+  ;;; lc-package.el --- Package Management -*- lexical-binding: t -*-
   ;;;; straight.el
 
   (defvar bootstrap-version)
@@ -78,6 +111,7 @@
   (setq straight-use-package-by-default t)
 
   (provide 'lc-package)
+  ;;; lc-package.el ends here
 #+end_src
 
 * Core Configuration
@@ -87,7 +121,7 @@
 ** Lexical Binding
 
 #+begin_src emacs-lisp
-  ;;  -*-lexical-binding: t-*-
+  ;;; lc-core.el --- Core Configuration.  -*- lexical-binding: t -*-
 #+end_src
 
 #+RESULTS:
@@ -141,15 +175,12 @@
 ** Native compilation
 
 #+begin_src emacs-lisp
-
-  ;;; -- Native Compilation -----
-
-  ;; Silence compiler warnings as they can be pretty disruptive
-  ;; (setq native-comp-async-report-warnings-errors nil)
-
-  ;; Set the right directory to store the native comp cache
-  ;; (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
-
+   ;;; -- Native Compilation -----
+  (when (featurep 'native-comp)
+    ;; Silence compiler warnings as they can be pretty disruptive
+    (setq native-comp-async-report-warnings-errors nil)
+    ;; Set the right directory to store the native comp cache
+    (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory)))
 #+end_src
 
 #+RESULTS:
@@ -205,23 +236,37 @@
   (setq vc-follow-symlinks t)
   (setq ad-redefinition-action 'accept)
 
-  (defun my/change-org-font-size (size)
+  (defun lc/change-org-font-size (size)
     "Change font size for Org mode files and block cells to SIZE."
     (interactive "nFont size: ") ; Allows you to input the font size dynamically
-    (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height size)
-    ;;Set the variable pitch face
-    (set-face-attribute 'variable-pitch nil :font "Cantarell" :height size :weight 'regular)
-    (set-face-attribute 'org-block nil :height size) ; Change font size for org blocks
-    (my/org-fonts))
 
-  (defun my/change-font-size (size)
+    (set-face-attribute 'fixed-pitch nil
+                        :font "JetBrains Mono"
+                        :height size)
+
+    ;;Set the variable pitch face
+    (set-face-attribute 'variable-pitch nil :font "Iosevka Aile"
+                        :height size
+                        :weight 'light)
+
+    (set-face-attribute 'org-block nil
+                        :height size) ; Change font size for org blocks
+    (lc/org-fonts))
+
+  (defun lc/change-font-size (size)
     "Change font size."
     (interactive "nFont size: ") ; Allows you to input the font size dynamically
     (set-face-attribute 'default nil :height size)) ; Change font size for the buffer
+
+  (defun lc/change-all-font-size (size)
+    "Change all font sizes to size"
+    (interactive "nFont size: ")
+    (lc/change-font-size size)
+    (lc/change-org-font-size size))
 #+end_src
 
 #+RESULTS:
-: my/change-font-size
+: lc/change-all-font-size
 
 ** Appearance
 
@@ -248,14 +293,14 @@
 
   ;; Set the font face based on platform
   (set-face-attribute 'default nil
-                      :font "Fira Code Retina"
-                      ;; :weight 'normal
+                      :font "JetBrains Mono"
+                      :weight 'normal
                       :height (lc/system-settings-get 'emacs/default-face-size))
 
   ;; ;; Set the fixed pitch face
   (set-face-attribute 'fixed-pitch nil
-                      :font "Fira Code Retina"
-                      ;; :weight 'light
+                      :font "JetBrains Mono"
+                      :weight 'light
                       :height (lc/system-settings-get 'emacs/fixed-face-size))
 
   ;; ;; Set the variable pitch face
@@ -606,6 +651,7 @@
 
 #+begin_src emacs-lisp
   (provide 'lc-core)
+  ;;; lc-core.el ends here
 #+end_src
 
 #+RESULTS:
@@ -617,7 +663,7 @@
 :END:
 
 #+begin_src emacs-lisp
-  ;;  -*-lexical-binding: t-*-
+  ;;; lc-keys.el --- Package Management -*- lexical-binding: t -*-
 
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -628,6 +674,7 @@
   (define-key minibuffer-local-map (kbd "C-;") 'backward-delete-char)
 
   (provide 'lc-keys)
+  ;;; lc-keys.el ends here
 #+end_src
 
 #+RESULTS:
@@ -639,8 +686,7 @@
 :END:
 
 #+begin_src emacs-lisp
-  ;;  -*-lexical-binding: t-*-
-  ;;; --- Evil ---
+  ;;; lc-evil.el --- Package Management -*- lexical-binding: t -*-
 
   (use-package undo-tree
     :init
@@ -747,6 +793,7 @@
     (evil-collection-init))
 
   (provide 'lc-evil)
+  ;;; lc-evil.el ends here
 #+end_src
 
 #+RESULTS:
@@ -756,9 +803,10 @@
 :PROPERTIES:
 :header-args: emacs-lisp :tangle .config/emacs/modules/lc-interface.el :mkdirp yes
 :END:
+
 ** Lexical Binding
 #+begin_src emacs-lisp
-  ;; -*- lexical-binding: t; -*-
+  ;;; lc-interface.el --- Package Management -*- lexical-binding: t -*-
 #+end_src
 
 #+RESULTS:
@@ -1042,7 +1090,7 @@
    ;; go back to zmq and run make configure and then make
    ;;(add-to-list 'load-path "/home/leon/.emacs.d/lisp/zmq")
    (use-package zmq
-     :load-path "/home/leon/.emacs.d/lisp/zmq")
+     :load-path "/home/leon/config/emacs/lisp/zmq")
 
    (use-package ox-ipynb
      :straight (ox-ipynb
@@ -1055,7 +1103,7 @@
 
  #+begin_src emacs-lisp
    ;; getting notebook like experience with scimax
-   (add-to-list 'load-path "/home/leon/.dotfiles/.emacs.d/lisp/scimax")
+   (add-to-list 'load-path "/home/leon/.config/emacs/lisp/scimax")
    (require 'lc-scimax)
    ;; (use-package scimax
    ;;   :load-path "/home/leon/.dotfiles/.emacs.d/lisp/scimax")
@@ -1065,28 +1113,27 @@
  : lc-scimax
 
  #+begin_src emacs-lisp
-   ;;;; custom setup
-   (defun dw/org-mode-setup ()
-     (org-indent-mode)
-     (variable-pitch-mode 1)
-     (auto-fill-mode 0)
-     (visual-line-mode 1)
-     (setq evil-auto-indent nil)
-     (setq org-support-shift-select t)
-     (diminish org-indent-mode))
+    ;;;; custom setup
+    (defun dw/org-mode-setup ()
+      (org-indent-mode)
+      (variable-pitch-mode 1)
+      (auto-fill-mode 0)
+      (visual-line-mode 1)
+      (setq evil-auto-indent nil)
+      (setq org-support-shift-select t)
+      (diminish org-indent-mode))
 
-   (defun my/org-fonts ()
-
-     (set-face-attribute 'org-document-title nil :font "Cantarell" :weight 'bold :height 1.3)
-     (dolist (face '((org-level-1 . 1.2)
-                     (org-level-2 . 1.1)
-                     (org-level-3 . 1.05)
-                     (org-level-4 . 1.0)
-                     (org-level-5 . 1.1)
-                     (org-level-6 . 1.1)
-                     (org-level-7 . 1.1)
-                     (org-level-8 . 1.1)))
-       (set-face-attribute (car face) nil :font "Cantarell" :weight 'medium :height (cdr face))))
+    (defun lc/org-fonts ()
+   (set-face-attribute 'org-document-title nil :font "JetBrains Mono" :weight 'bold :height 1.3)
+   (dolist (face '((org-level-1 . 1.2)
+                   (org-level-2 . 1.1)
+                   (org-level-3 . 1.05)
+                   (org-level-4 . 1.0)
+                   (org-level-5 . 1.1)
+                   (org-level-6 . 1.1)
+                   (org-level-7 . 1.1)
+                   (org-level-8 . 1.1)))
+     (set-face-attribute (car face) nil :font "JetBrains Mono" :weight 'medium :height (cdr face))))
  #+end_src
 
  #+RESULTS:
@@ -1123,10 +1170,7 @@
 
      ;; (setq org-modules
      ;;       '(org-crypt
-     ;;         org-habit
-     ;;         org-bookmark
-     ;;         org-eshell
-     ;;         org-irc))
+     ;;         org-eshell))
 
      (setq org-refile-targets '((nil :maxlevel . 1)
                                 (org-agenda-files :maxlevel . 1))
@@ -1190,7 +1234,7 @@
      :straight (:type built-in) ; ensure straight.el knows this is a built-in package
      :after org
      :config
-     (my/org-fonts))
+     (lc/org-fonts))
  #+end_src
 
  #+RESULTS:
@@ -1258,7 +1302,7 @@
  #+end_src
 
  #+RESULTS:
- | visual-fill-column-mode | (lambda nil (display-line-numbers-mode 0)) | org-tempo-setup | (closure (bootstrap-version t) nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config nil 'make-it-local)) | rainbow-mode | org-modern-mode | org-appear-mode | evil-org-mode | my/org-block-templates | my/org-fonts | dw/org-mode-setup | jupyter-org-interaction-mode | scimax-fix-<>-syntax | (closure (bootstrap-version t) nil (set (make-local-variable 'company-backends) '((company-capf company-dabbrev) company-files company-keywords))) | (closure (org--rds reftex-docstruct-symbol org--single-lines-list-is-paragraph org-element-greater-elements org-agenda-restrict-end org-agenda-restrict-begin org-agenda-restrict visual-fill-column-width org-clock-history org-agenda-current-date org-with-time org-defdecode org-def org-read-date-inactive org-ans2 org-ans1 org-columns-current-fmt-compiled org-clock-current-task org-clock-effort org-agenda-skip-function org-agenda-skip-comment-trees org-agenda-archives-mode org-end-time-was-given org-time-was-given org-log-note-extra org-log-note-purpose org-log-post-message org-last-inserted-timestamp org-last-changed-timestamp org-entry-property-inherited-from org-state org-agenda-headline-snapshot-before-repeat org-agenda-buffer-name org-agenda-start-on-weekday org-agenda-buffer-tmp-name org-priority-regexp org-mode-abbrev-table org-element-cache-persistent org-tbl-menu org-org-menu org-struct-menu org-entities org-last-state org-id-track-globally org-clock-start-time texmathp-why remember-data-file org-agenda-tags-todo-honor-ignore-options calc-embedded-open-mode calc-embedded-open-formula calc-embedded-close-formula align-mode-rules-list org-emphasis-alist org-emphasis-regexp-components org-export-registered-backends org-modules crm-separator org-babel-load-languages org-id-overriding-file-name org-indent-indentation-per-level org-element--timestamp-regexp org-element-cache-map-continue-from org-element-paragraph-separate org-agenda-buffer-name org-inlinetask-min-level t) nil (add-hook 'change-major-mode-hook 'org-fold-show-all 'append 'local)) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | dw/org-mode-visual-fill | (closure (t) nil (display-line-numbers-mode 0)) | scimax-ob-src-key-bindings |
+ | visual-fill-column-mode | (lambda nil (display-line-numbers-mode 0)) | org-tempo-setup | (closure (bootstrap-version t) nil (add-hook 'after-save-hook #'efs/org-babel-tangle-config nil 'make-it-local)) | rainbow-mode | org-modern-mode | org-appear-mode | evil-org-mode | my/org-block-templates  | my/org-fonts | dw/org-mode-setup | jupyter-org-interaction-mode | scimax-fix-<>-syntax | (closure (bootstrap-version t) nil (set (make-local-variable 'company-backends) '((company-capf company-dabbrev) company-files company-keywords))) | (closure (org--rds reftex-docstruct-symbol org--single-lines-list-is-paragraph org-element-greater-elements org-agenda-restrict-end org-agenda-restrict-begin org-agenda-restrict visual-fill-column-width org-clock-history org-agenda-current-date org-with-time org-defdecode org-def org-read-date-inactive org-ans2 org-ans1 org-columns-current-fmt-compiled org-clock-current-task org-clock-effort org-agenda-skip-function org-agenda-skip-comment-trees org-agenda-archives-mode org-end-time-was-given org-time-was-given org-log-note-extra org-log-note-purpose org-log-post-message org-last-inserted-timestamp org-last-changed-timestamp org-entry-property-inherited-from org-state org-agenda-headline-snapshot-before-repeat org-agenda-buffer-name org-agenda-start-on-weekday org-agenda-buffer-tmp-name org-priority-regexp org-mode-abbrev-table org-element-cache-persistent org-tbl-menu org-org-menu org-struct-menu org-entities org-last-state org-id-track-globally org-clock-start-time texmathp-why remember-data-file org-agenda-tags-todo-honor-ignore-options calc-embedded-open-mode calc-embedded-open-formula calc-embedded-close-formula align-mode-rules-list org-emphasis-alist org-emphasis-regexp-components org-export-registered-backends org-modules crm-separator org-babel-load-languages org-id-overriding-file-name org-indent-indentation-per-level org-element--timestamp-regexp org-element-cache-map-continue-from org-element-paragraph-separate org-agenda-buffer-name org-inlinetask-min-level t) nil (add-hook 'change-major-mode-hook 'org-fold-show-all 'append 'local)) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | dw/org-mode-visual-fill | (closure (t) nil (display-line-numbers-mode 0)) | scimax-ob-src-key-bindings |
 
  #+begin_src emacs-lisp
    ;;;; org-cv
@@ -1757,16 +1801,20 @@ Sets the background of HTML color strings in buffers to be the color mentioned.
 
 ** End
 #+begin_src emacs-lisp
-  (provide 'lc-dev)
-  ;;; lc-dev.el ends here
+  (provide 'lc-interface)
+  ;;; lc-interface.el ends here
 #+end_src
 
 #+RESULTS:
 : lc-dev
 
 * Shell
+:PROPERTIES:
+:header-args: emacs-lisp :tangle .config/emacs/modules/lc-shell.el :mkdirp yes
+:END:
+
 #+begin_src emacs-lisp
-  ;; -*- lexical-binding: t; -*-
+  ;;; lc-shell.el --- Package Management -*- lexical-binding: t -*-
 
   (defun read-file (file-path)
     (with-temp-buffer
@@ -1943,6 +1991,7 @@ Sets the background of HTML color strings in buffers to be the color mentioned.
       (advice-add 'evil-collection-vterm-insert :before #'vterm-reset-cursor-point)))
 
   (provide 'lc-shell)
+  ;;; lc-shell.el ends here
 #+end_src
 
 #+RESULTS:
@@ -1954,8 +2003,7 @@ Sets the background of HTML color strings in buffers to be the color mentioned.
 :END:
 
 #+begin_src emacs-lisp
-  ;;  -*-lexical-binding: t-*-
-  ;;; ai tools
+  ;;; lc-ai.el --- Package Management -*- lexical-binding: t -*-
 #+end_src
 
 #+RESULTS:
